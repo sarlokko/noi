@@ -1,0 +1,11 @@
+{
+  "siteTitle": "Noi",
+  "photographer": "Marco",
+  "tagline": "Scatti selezionati — reflex",
+  "printSizes": [
+    { "name": "10×15 cm", "dpi": 300 },
+    { "name": "13×18 cm", "dpi": 300 },
+    { "name": "20×30 cm", "dpi": 300 },
+    { "name": "30×40 cm", "dpi": 300 }
+  ]
+}

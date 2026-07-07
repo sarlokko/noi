@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Noi — scatti selezionati">
+  <meta name="theme-color" content="#0d0d0d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Noi">
+  <title>Noi</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/gallery.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="hero-label">Portfolio</p>
+      <h1 id="site-title">Noi</h1>
+      <p id="site-tagline" class="hero-tagline">Scatti selezionati — reflex</p>
+      <p id="photo-count" class="hero-count"></p>
+    </div>
+  </header>
+
+  <nav class="toolbar">
+    <button type="button" id="btn-grid" class="toolbar-btn active">Griglia</button>
+    <button type="button" id="btn-featured" class="toolbar-btn">In evidenza</button>
+    <button type="button" id="btn-print-info" class="toolbar-btn">Stampa</button>
+  </nav>
+
+  <section id="print-info" class="print-info hidden">
+    <h2>Preparazione stampa</h2>
+    <p>Ogni foto è disponibile in alta risoluzione. Clicca una foto → <strong>Scarica originale</strong> o <strong>Stampa</strong>.</p>
+    <ul id="print-sizes"></ul>
+    <p class="print-tip">Consiglio: usa file originali per stampe &gt; 20×30 cm. Per web e anteprima usiamo versioni ottimizzate WebP.</p>
+  </section>
+
+  <main id="gallery" class="gallery"></main>
+
+  <div id="empty-state" class="empty-state hidden">
+    <p>Nessuna foto in vetrina.</p>
+    <code>npm run import -- "C:\percorso\alle\tue\foto"</code>
+  </div>
+
+  <div id="lightbox" class="lightbox hidden" aria-hidden="true">
+    <button type="button" id="lb-close" class="lb-close" aria-label="Chiudi">&times;</button>
+    <button type="button" id="lb-prev" class="lb-nav lb-prev" aria-label="Precedente">&#8249;</button>
+    <button type="button" id="lb-next" class="lb-nav lb-next" aria-label="Successiva">&#8250;</button>
+    <figure class="lb-figure">
+      <img id="lb-img" src="" alt="">
+      <figcaption>
+        <span id="lb-title"></span>
+        <span id="lb-meta"></span>
+      </figcaption>
+    </figure>
+    <div class="lb-actions">
+      <a id="lb-download" class="lb-btn" href="#" download>⬇ Scarica originale</a>
+      <button type="button" id="lb-print" class="lb-btn">🖨 Stampa</button>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p id="footer-text">&copy; <span id="year"></span> — Vetrina fotografica</p>
+  </footer>
+
+  <script src="js/gallery.js"></script>
+</body>
+</html>

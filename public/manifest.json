@@ -1,0 +1,18 @@
+{
+  "name": "Noi",
+  "short_name": "Noi",
+  "description": "Scatti selezionati — reflex",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0d0d0d",
+  "theme_color": "#0d0d0d",
+  "lang": "it",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

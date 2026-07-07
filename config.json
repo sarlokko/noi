@@ -1,0 +1,21 @@
+{
+  "siteTitle": "Noi",
+  "photographer": "Marco",
+  "tagline": "Scatti selezionati — reflex",
+  "sourceFolder": "E:\\100_FUJI",
+  "maxGalleryPhotos": 24,
+  "export": {
+    "webMaxSize": 2200,
+    "webQuality": 84,
+    "thumbMaxSize": 600,
+    "thumbQuality": 80,
+    "originalMaxSize": 0,
+    "originalQuality": 92
+  },
+  "printSizes": [
+    { "name": "10×15 cm", "ratio": "2:3", "dpi": 300 },
+    { "name": "13×18 cm", "ratio": "2:3", "dpi": 300 },
+    { "name": "20×30 cm", "ratio": "2:3", "dpi": 300 },
+    { "name": "30×40 cm", "ratio": "3:4", "dpi": 300 }
+  ]
+}
