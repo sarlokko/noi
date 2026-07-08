@@ -5,6 +5,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { ensureBackend } = require("./tfjs-cpu-shim");
 const faceapi = require("@vladmandic/face-api");
 const canvas = require("canvas");
 
@@ -19,6 +20,7 @@ let matcher = null;
 
 async function loadModels() {
   if (modelsLoaded) return;
+  await ensureBackend();
   await faceapi.nets.ssdMobilenetv1.loadFromDisk(MODEL_PATH);
   await faceapi.nets.faceLandmark68Net.loadFromDisk(MODEL_PATH);
   await faceapi.nets.faceRecognitionNet.loadFromDisk(MODEL_PATH);

@@ -11,7 +11,7 @@ function getFamilyMatcher() {
   } catch (err) {
     console.warn("Filtro famiglia non disponibile:", err.message);
     console.warn("  L'import userà solo qualità/nitidezza (50 foto migliori).");
-    console.warn("  Per il filtro volti: Node.js 22 LTS + npm run install:family");
+    console.warn("  Per il filtro volti: npm install && npm run family:verify");
     cached = false;
     return null;
   }

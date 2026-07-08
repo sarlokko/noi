@@ -111,7 +111,7 @@ async function main() {
   if (familyEnabled) {
     const refDir = path.resolve(ROOT, FAMILY.referenceDir || "config/family");
     console.log("Caricamento riferimenti famiglia da:", refDir);
-    const matcher = await loadFamilyReferences(refDir, FAMILY.matchThreshold ?? 0.55);
+    const matcher = await loadFamilyReferences(refDir, FAMILY.matchThreshold ?? 0.62);
     if (matcher) {
       familyActive = true;
       console.log("Filtro famiglia attivo (Marco, Laura, Luca, Giorgia).");
