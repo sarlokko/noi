@@ -17,6 +17,11 @@ function getFamilyMatcher() {
   }
 }
 
+function configureFamilyMatcher(options) {
+  const mod = getFamilyMatcher();
+  if (mod) mod.configureFamilyMatcher(options);
+}
+
 async function loadFamilyReferences(refDir, threshold) {
   const mod = getFamilyMatcher();
   if (!mod) return null;
@@ -29,4 +34,9 @@ async function scoreFamilyPhoto(filePath, options) {
   return mod.scoreFamilyPhoto(filePath, options);
 }
 
-module.exports = { loadFamilyReferences, scoreFamilyPhoto, getFamilyMatcher };
+module.exports = {
+  configureFamilyMatcher,
+  loadFamilyReferences,
+  scoreFamilyPhoto,
+  getFamilyMatcher,
+};

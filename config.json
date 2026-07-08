@@ -8,7 +8,11 @@
     "enabled": true,
     "referenceDir": "config/family",
     "matchThreshold": 0.62,
-    "minMatches": 1
+    "minMatches": 1,
+    "quickDetectMaxSize": 512,
+    "matchDetectMaxSize": 1024,
+    "concurrency": 4,
+    "useCache": true
   },
   "export": {
     "webMaxSize": 2200,

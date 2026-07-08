@@ -1,6 +1,5 @@
 /**
  * Riconoscimento volti famiglia (Marco, Laura, Luca, Giorgia).
- * Richiede foto di riferimento in config/family/*.jpg
  */
 
 const fs = require("fs");
@@ -14,29 +13,39 @@ faceapi.env.monkeyPatch({ Canvas: canvas.Canvas, Image: canvas.Image });
 
 const ROOT = path.join(__dirname, "..");
 const MODEL_PATH = path.join(ROOT, "node_modules/@vladmandic/face-api/model");
-const DETECT_MAX = 1600;
+
+const SETTINGS = {
+  quickDetectMaxSize: 512,
+  matchDetectMaxSize: 1024,
+  minConfidence: 0.45,
+};
 
 let modelsLoaded = false;
 let matcher = null;
 
+function configureFamilyMatcher(options = {}) {
+  Object.assign(SETTINGS, options);
+}
+
 async function loadModels() {
   if (modelsLoaded) return;
   await ensureBackend();
+  await faceapi.nets.tinyFaceDetector.loadFromDisk(MODEL_PATH);
   await faceapi.nets.ssdMobilenetv1.loadFromDisk(MODEL_PATH);
   await faceapi.nets.faceLandmark68Net.loadFromDisk(MODEL_PATH);
   await faceapi.nets.faceRecognitionNet.loadFromDisk(MODEL_PATH);
   modelsLoaded = true;
 }
 
-async function loadImageForFaceApi(source) {
+async function loadImageCanvas(source, maxSize) {
   if (source instanceof canvas.Canvas) return source;
 
   let buffer;
   if (typeof source === "string") {
     buffer = await sharp(source)
       .rotate()
-      .resize(DETECT_MAX, DETECT_MAX, { fit: "inside", withoutEnlargement: true })
-      .jpeg({ quality: 88 })
+      .resize(maxSize, maxSize, { fit: "inside", withoutEnlargement: true })
+      .jpeg({ quality: 82 })
       .toBuffer();
   } else {
     buffer = source;
@@ -48,9 +57,22 @@ async function loadImageForFaceApi(source) {
   return c;
 }
 
-async function detectFaces(source) {
+async function quickHasFaces(filePath) {
   try {
-    const img = await loadImageForFaceApi(source);
+    const img = await loadImageCanvas(filePath, SETTINGS.quickDetectMaxSize);
+    const faces = await faceapi.detectAllFaces(
+      img,
+      new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.4 })
+    );
+    return faces.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+async function detectFacesFull(source) {
+  try {
+    const img = await loadImageCanvas(source, SETTINGS.matchDetectMaxSize);
     return await faceapi.detectAllFaces(img).withFaceLandmarks().withFaceDescriptors();
   } catch {
     return [];
@@ -72,7 +94,7 @@ async function loadFamilyReferences(refDir, threshold = 0.55) {
   for (const file of files) {
     const name = path.basename(file, path.extname(file)).toLowerCase();
     const full = path.join(refDir, file);
-    const faces = await detectFaces(full);
+    const faces = await detectFacesFull(full);
     if (!faces.length) {
       console.warn(`  Nessun volto in riferimento: ${file}`);
       continue;
@@ -88,13 +110,18 @@ async function loadFamilyReferences(refDir, threshold = 0.55) {
 }
 
 async function scoreFamilyPhoto(filePath, options = {}) {
-  const { minMatches = 1, minConfidence = 0.45 } = options;
-  if (!matcher) return { familyScore: 0, matches: [], faceCount: 0 };
+  const { minMatches = 1, skipQuick = false } = options;
+  if (!matcher) return { familyScore: 0, matches: [], faceCount: 0, skippedQuick: false };
 
   try {
-    const faces = await detectFaces(filePath);
-    if (!faces.length) return { familyScore: 0, matches: [], faceCount: 0 };
+    if (!skipQuick && !(await quickHasFaces(filePath))) {
+      return { familyScore: 0, matches: [], faceCount: 0, skippedQuick: true };
+    }
 
+    const faces = await detectFacesFull(filePath);
+    if (!faces.length) return { familyScore: 0, matches: [], faceCount: 0, skippedQuick: false };
+
+    const minConfidence = options.minConfidence ?? SETTINGS.minConfidence;
     const matches = [];
     const matchedMembers = new Set();
 
@@ -108,19 +135,25 @@ async function scoreFamilyPhoto(filePath, options = {}) {
 
     const familyScore =
       matchedMembers.size >= minMatches ? matchedMembers.size * 100 + matches.length * 10 : 0;
-    return { familyScore, matches, faceCount: faces.length, members: [...matchedMembers] };
+    return {
+      familyScore,
+      matches,
+      faceCount: faces.length,
+      members: [...matchedMembers],
+      skippedQuick: false,
+    };
   } catch {
-    return { familyScore: 0, matches: [], faceCount: 0 };
+    return { familyScore: 0, matches: [], faceCount: 0, skippedQuick: false };
   }
 }
 
 async function extractReferenceFace(sourcePath, outPath) {
   await loadModels();
-  const faces = await detectFaces(sourcePath);
+  const faces = await detectFacesFull(sourcePath);
   if (!faces.length) throw new Error(`Nessun volto in ${sourcePath}`);
   const best = faces.reduce((a, b) => (a.detection.score > b.detection.score ? a : b));
   const box = best.detection.box;
-  const img = await loadImageForFaceApi(sourcePath);
+  const img = await loadImageCanvas(sourcePath, SETTINGS.matchDetectMaxSize);
   const pad = Math.round(Math.max(box.width, box.height) * 0.3);
   const x = Math.max(0, Math.floor(box.x - pad));
   const y = Math.max(0, Math.floor(box.y - pad));
@@ -133,9 +166,9 @@ async function extractReferenceFace(sourcePath, outPath) {
 }
 
 module.exports = {
+  configureFamilyMatcher,
   loadFamilyReferences,
   scoreFamilyPhoto,
   extractReferenceFace,
-  detectFaces,
   loadModels,
 };

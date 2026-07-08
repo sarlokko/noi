@@ -16,10 +16,27 @@ Apri http://localhost:3000
 ## Cosa fa l'import
 
 1. Scansiona tutte le JPG/PNG/TIF nella cartella (anche sottocartelle)
-2. **Filtra solo la famiglia** (Marco, Laura, Luca, Giorgia) se ci sono riferimenti in `config/family/`
+2. **Filtra solo la famiglia** (Marco, Laura, Luca, Giorgia) con pre-filtro veloce + cache
 3. **Seleziona automaticamente** le migliori (risoluzione, nitidezza, qualità file)
 4. Genera versioni **web** (WebP), **anteprime** e copia **originali** per stampa
 5. Crea la gallery in `public/data/gallery.json`
+
+### Velocità import (filtro famiglia)
+
+L'analisi di ~3000 foto richiedeva 1–2 ore; ora usa tre accellerazioni:
+
+1. **Pre-filtro volti** — TinyFaceDetector a bassa risoluzione (512px) scarta paesaggi e foto senza volti in millisecondi
+2. **Parallelismo** — analizza più foto in parallelo (`concurrency` in `config.json`, default 4)
+3. **Cache** — risultati salvati in `.cache/family-scores.json`; un secondo import salta le foto già analizzate
+
+Tempi indicativi su PC medio: **15–40 min** al primo giro, **pochi minuti** se rilanci con cache attiva.
+
+Se `git pull` è lento, è perché `public/` contiene molte immagini. Per aggiornare solo gli script:
+
+```bash
+git pull --depth 1
+# oppure, dopo il primo clone completo, evita di committare public/ finché la gallery non è pronta
+```
 
 ### Riferimenti famiglia (opzionale ma consigliato)
 
@@ -40,6 +57,8 @@ Modifica `config.json` e `public/config.json`:
 - `photographer` — tuo nome
 - `tagline` — sottotitolo
 - `maxGalleryPhotos` — quante foto in vetrina (default 50)
+- `familyFilter.concurrency` — foto analizzate in parallelo (default 4)
+- `familyFilter.useCache` — riusa analisi precedenti (default true)
 
 ## Stampa
 
