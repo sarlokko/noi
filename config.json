@@ -3,7 +3,13 @@
   "photographer": "Marco",
   "tagline": "Scatti selezionati — reflex",
   "sourceFolder": "E:\\100_FUJI",
-  "maxGalleryPhotos": 24,
+  "maxGalleryPhotos": 50,
+  "familyFilter": {
+    "enabled": true,
+    "referenceDir": "config/family",
+    "matchThreshold": 0.55,
+    "minMatches": 1
+  },
   "export": {
     "webMaxSize": 2200,
     "webQuality": 84,

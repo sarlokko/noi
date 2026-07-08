@@ -1,5 +1,5 @@
 /**
- * Importa foto da cartella reflex, seleziona le migliori, genera web + thumbs.
+ * Importa foto da cartella reflex, seleziona le migliori con filtro famiglia.
  * Uso: node scripts/import-photos.js "C:\percorso\foto"
  *      npm run import -- "C:\percorso\foto"
  */
@@ -8,15 +8,17 @@ const fs = require("fs");
 const path = require("path");
 const sharp = require("sharp");
 const { getExportSettings, exportPhotoFiles } = require("./export-utils");
+const { loadFamilyReferences, scoreFamilyPhoto } = require("./family-matcher");
 
 const ROOT = path.join(__dirname, "..");
 const CONFIG = JSON.parse(fs.readFileSync(path.join(ROOT, "config.json"), "utf8"));
 const EXT = new Set([".jpg", ".jpeg", ".png", ".webp", ".tif", ".tiff"]);
+const FAMILY = CONFIG.familyFilter || {};
 
 const sourceArg = process.argv[2] || CONFIG.sourceFolder;
 if (!sourceArg || !fs.existsSync(sourceArg)) {
   console.error("Specifica la cartella foto:");
-  console.error('  npm run import -- "C:\\Users\\...\\MieFoto"');
+  console.error('  npm run import -- "E:\\100_FUJI"');
   process.exit(1);
 }
 
@@ -45,7 +47,7 @@ function walk(dir, files = []) {
   return files;
 }
 
-async function scoreImage(filePath) {
+async function scoreImage(filePath, familyEnabled) {
   const stat = fs.statSync(filePath);
   let meta;
   try {
@@ -54,7 +56,7 @@ async function scoreImage(filePath) {
     return null;
   }
   const pixels = (meta.width || 0) * (meta.height || 0);
-  if (pixels < 400_000) return null; // troppo piccola
+  if (pixels < 400_000) return null;
 
   let sharpness = 0;
   try {
@@ -72,8 +74,18 @@ async function scoreImage(filePath) {
   }
 
   const megapixels = pixels / 1_000_000;
-  const score = megapixels * 40 + sharpness * 0.15 + Math.log10(stat.size + 1) * 5;
-  return { filePath, meta, score, size: stat.size };
+  let qualityScore = megapixels * 40 + sharpness * 0.15 + Math.log10(stat.size + 1) * 5;
+
+  let family = { familyScore: 0, members: [] };
+  if (familyEnabled) {
+    family = await scoreFamilyPhoto(filePath, {
+      minMatches: FAMILY.minMatches ?? 1,
+    });
+    if (family.familyScore === 0) return null;
+    qualityScore += family.familyScore;
+  }
+
+  return { filePath, meta, score: qualityScore, size: stat.size, family };
 }
 
 function slug(name, i) {
@@ -89,29 +101,56 @@ async function exportPhoto(filePath, id) {
 }
 
 async function main() {
+  const familyEnabled = FAMILY.enabled !== false;
+  let familyActive = false;
+
+  if (familyEnabled) {
+    const refDir = path.resolve(ROOT, FAMILY.referenceDir || "config/family");
+    console.log("Caricamento riferimenti famiglia da:", refDir);
+    const matcher = await loadFamilyReferences(refDir, FAMILY.matchThreshold ?? 0.55);
+    if (matcher) {
+      familyActive = true;
+      console.log("Filtro famiglia attivo (Marco, Laura, Luca, Giorgia).");
+    } else {
+      console.warn("ATTENZIONE: nessun riferimento in config/family/ — import senza filtro famiglia.");
+      console.warn('  Crea i riferimenti con: npm run family:setup -- marco "percorso/foto.jpg"');
+    }
+  }
+
   console.log("Scansione:", sourceArg);
   const all = walk(sourceArg);
   console.log(`Trovate ${all.length} immagini.`);
 
   const scored = [];
-  for (const f of all) {
-    const s = await scoreImage(f);
+  let skipped = 0;
+  for (let i = 0; i < all.length; i++) {
+    const f = all[i];
+    if (i % 25 === 0) process.stdout.write(`  Analisi ${i + 1}/${all.length}...\r`);
+    const s = await scoreImage(f, familyActive);
     if (s) scored.push(s);
+    else skipped++;
   }
+  console.log(`\nIdonee: ${scored.length}, escluse: ${skipped}.`);
+
   scored.sort((a, b) => b.score - a.score);
   const picked = scored.slice(0, CONFIG.maxGalleryPhotos);
-  console.log(`Selezionate ${picked.length} migliori foto.`);
+  console.log(`Selezionate ${picked.length} migliori foto (max ${CONFIG.maxGalleryPhotos}).`);
 
   const gallery = [];
-
   for (let i = 0; i < picked.length; i++) {
-    const { filePath } = picked[i];
+    const { filePath, family } = picked[i];
     const id = slug(filePath, i + 1);
-    gallery.push(await exportPhoto(filePath, id));
+    const entry = await exportPhoto(filePath, id);
+    if (family?.members?.length) entry.family = family.members;
+    gallery.push(entry);
+    process.stdout.write(`  Esportata ${i + 1}/${picked.length}: ${path.basename(filePath)}\n`);
   }
 
-  fs.writeFileSync(OUT.data, JSON.stringify({ updated: new Date().toISOString(), photos: gallery }, null, 2));
-  console.log("Gallery pronta in public/ — avvia con: npm run serve");
+  fs.writeFileSync(
+    OUT.data,
+    JSON.stringify({ updated: new Date().toISOString(), photos: gallery }, null, 2)
+  );
+  console.log("\nGallery pronta in public/ — avvia con: npm run serve");
 }
 
 main().catch((e) => {
