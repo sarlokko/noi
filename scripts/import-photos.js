@@ -82,9 +82,13 @@ async function scoreImage(filePath, familyEnabled) {
 
   let family = { familyScore: 0, members: [] };
   if (familyEnabled) {
-    family = await scoreFamilyPhoto(filePath, {
-      minMatches: FAMILY.minMatches ?? 1,
-    });
+    try {
+      family = await scoreFamilyPhoto(filePath, {
+        minMatches: FAMILY.minMatches ?? 1,
+      });
+    } catch {
+      return null;
+    }
     if (family.familyScore === 0) return null;
     qualityScore += family.familyScore;
   }

@@ -5,6 +5,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const sharp = require("sharp");
 const { ensureBackend } = require("./tfjs-cpu-shim");
 const faceapi = require("@vladmandic/face-api");
 const canvas = require("canvas");
@@ -13,7 +14,7 @@ faceapi.env.monkeyPatch({ Canvas: canvas.Canvas, Image: canvas.Image });
 
 const ROOT = path.join(__dirname, "..");
 const MODEL_PATH = path.join(ROOT, "node_modules/@vladmandic/face-api/model");
-const DEFAULT_REF_DIR = path.join(ROOT, "config", "family");
+const DETECT_MAX = 1600;
 
 let modelsLoaded = false;
 let matcher = null;
@@ -27,13 +28,33 @@ async function loadModels() {
   modelsLoaded = true;
 }
 
-async function loadImage(filePath) {
-  return canvas.loadImage(filePath);
+async function loadImageForFaceApi(source) {
+  if (source instanceof canvas.Canvas) return source;
+
+  let buffer;
+  if (typeof source === "string") {
+    buffer = await sharp(source)
+      .rotate()
+      .resize(DETECT_MAX, DETECT_MAX, { fit: "inside", withoutEnlargement: true })
+      .jpeg({ quality: 88 })
+      .toBuffer();
+  } else {
+    buffer = source;
+  }
+
+  const img = await canvas.loadImage(buffer);
+  const c = canvas.createCanvas(img.width, img.height);
+  c.getContext("2d").drawImage(img, 0, 0);
+  return c;
 }
 
 async function detectFaces(source) {
-  const img = typeof source === "string" ? await loadImage(source) : source;
-  return faceapi.detectAllFaces(img).withFaceLandmarks().withFaceDescriptors();
+  try {
+    const img = await loadImageForFaceApi(source);
+    return await faceapi.detectAllFaces(img).withFaceLandmarks().withFaceDescriptors();
+  } catch {
+    return [];
+  }
 }
 
 async function loadFamilyReferences(refDir, threshold = 0.55) {
@@ -70,22 +91,27 @@ async function scoreFamilyPhoto(filePath, options = {}) {
   const { minMatches = 1, minConfidence = 0.45 } = options;
   if (!matcher) return { familyScore: 0, matches: [], faceCount: 0 };
 
-  const faces = await detectFaces(filePath);
-  if (!faces.length) return { familyScore: 0, matches: [], faceCount: 0 };
+  try {
+    const faces = await detectFaces(filePath);
+    if (!faces.length) return { familyScore: 0, matches: [], faceCount: 0 };
 
-  const matches = [];
-  const matchedMembers = new Set();
+    const matches = [];
+    const matchedMembers = new Set();
 
-  for (const face of faces) {
-    if (face.detection.score < minConfidence) continue;
-    const best = matcher.findBestMatch(face.descriptor);
-    if (best.label === "unknown") continue;
-    matches.push({ member: best.label, distance: best.distance, score: face.detection.score });
-    matchedMembers.add(best.label);
+    for (const face of faces) {
+      if (face.detection.score < minConfidence) continue;
+      const best = matcher.findBestMatch(face.descriptor);
+      if (best.label === "unknown") continue;
+      matches.push({ member: best.label, distance: best.distance, score: face.detection.score });
+      matchedMembers.add(best.label);
+    }
+
+    const familyScore =
+      matchedMembers.size >= minMatches ? matchedMembers.size * 100 + matches.length * 10 : 0;
+    return { familyScore, matches, faceCount: faces.length, members: [...matchedMembers] };
+  } catch {
+    return { familyScore: 0, matches: [], faceCount: 0 };
   }
-
-  const familyScore = matchedMembers.size >= minMatches ? matchedMembers.size * 100 + matches.length * 10 : 0;
-  return { familyScore, matches, faceCount: faces.length, members: [...matchedMembers] };
 }
 
 async function extractReferenceFace(sourcePath, outPath) {
@@ -94,7 +120,7 @@ async function extractReferenceFace(sourcePath, outPath) {
   if (!faces.length) throw new Error(`Nessun volto in ${sourcePath}`);
   const best = faces.reduce((a, b) => (a.detection.score > b.detection.score ? a : b));
   const box = best.detection.box;
-  const img = await loadImage(sourcePath);
+  const img = await loadImageForFaceApi(sourcePath);
   const pad = Math.round(Math.max(box.width, box.height) * 0.3);
   const x = Math.max(0, Math.floor(box.x - pad));
   const y = Math.max(0, Math.floor(box.y - pad));
