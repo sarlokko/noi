@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-08T16:54:13.899Z",
+  "updated": "2026-07-08T17:27:01.164Z",
   "photos": [
     {
       "id": "01-DSCF0876",
@@ -263,6 +263,292 @@
       "web": "photos/24-DSCF2220.webp",
       "thumb": "thumbs/24-DSCF2220-thumb.webp",
       "original": "originals/24-DSCF2220.jpg",
+      "aspectRatio": 0.667
+    },
+    {
+      "id": "25-DSCF1245",
+      "title": "DSCF1245",
+      "width": 7728,
+      "height": 5152,
+      "orientation": "landscape",
+      "web": "photos/25-DSCF1245.webp",
+      "thumb": "thumbs/25-DSCF1245-thumb.webp",
+      "original": "originals/25-DSCF1245.jpg",
+      "aspectRatio": 1.5
+    },
+    {
+      "id": "26-DSCF2241",
+      "title": "DSCF2241",
+      "width": 5152,
+      "height": 7728,
+      "orientation": "portrait",
+      "web": "photos/26-DSCF2241.webp",
+      "thumb": "thumbs/26-DSCF2241-thumb.webp",
+      "original": "originals/26-DSCF2241.jpg",
+      "aspectRatio": 0.667
+    },
+    {
+      "id": "27-DSCF2900",
+      "title": "DSCF2900",
+      "width": 5152,
+      "height": 7728,
+      "orientation": "portrait",
+      "web": "photos/27-DSCF2900.webp",
+      "thumb": "thumbs/27-DSCF2900-thumb.webp",
+      "original": "originals/27-DSCF2900.jpg",
+      "aspectRatio": 0.667
+    },
+    {
+      "id": "28-DSCF0707",
+      "title": "DSCF0707",
+      "width": 7728,
+      "height": 5152,
+      "orientation": "landscape",
+      "web": "photos/28-DSCF0707.webp",
+      "thumb": "thumbs/28-DSCF0707-thumb.webp",
+      "original": "originals/28-DSCF0707.jpg",
+      "aspectRatio": 1.5
+    },
+    {
+      "id": "29-DSCF1343",
+      "title": "DSCF1343",
+      "width": 7728,
+      "height": 5152,
+      "orientation": "landscape",
+      "web": "photos/29-DSCF1343.webp",
+      "thumb": "thumbs/29-DSCF1343-thumb.webp",
+      "original": "originals/29-DSCF1343.jpg",
+      "aspectRatio": 1.5
+    },
+    {
+      "id": "30-DSCF0874",
+      "title": "DSCF0874",
+      "width": 5152,
+      "height": 7728,
+      "orientation": "portrait",
+      "web": "photos/30-DSCF0874.webp",
+      "thumb": "thumbs/30-DSCF0874-thumb.webp",
+      "original": "originals/30-DSCF0874.jpg",
+      "aspectRatio": 0.667
+    },
+    {
+      "id": "31-DSCF0639",
+      "title": "DSCF0639",
+      "width": 7728,
+      "height": 5152,
+      "orientation": "landscape",
+      "web": "photos/31-DSCF0639.webp",
+      "thumb": "thumbs/31-DSCF0639-thumb.webp",
+      "original": "originals/31-DSCF0639.jpg",
+      "aspectRatio": 1.5
+    },
+    {
+      "id": "32-DSCF3618",
+      "title": "DSCF3618",
+      "width": 5152,
+      "height": 7728,
+      "orientation": "portrait",
+      "web": "photos/32-DSCF3618.webp",
+      "thumb": "thumbs/32-DSCF3618-thumb.webp",
+      "original": "originals/32-DSCF3618.jpg",
+      "aspectRatio": 0.667
+    },
+    {
+      "id": "33-DSCF0276",
+      "title": "DSCF0276",
+      "width": 7728,
+      "height": 5152,
+      "orientation": "landscape",
+      "web": "photos/33-DSCF0276.webp",
+      "thumb": "thumbs/33-DSCF0276-thumb.webp",
+      "original": "originals/33-DSCF0276.jpg",
+      "aspectRatio": 1.5
+    },
+    {
+      "id": "34-DSCF2786",
+      "title": "DSCF2786",
+      "width": 7728,
+      "height": 5152,
+      "orientation": "landscape",
+      "web": "photos/34-DSCF2786.webp",
+      "thumb": "thumbs/34-DSCF2786-thumb.webp",
+      "original": "originals/34-DSCF2786.jpg",
+      "aspectRatio": 1.5
+    },
+    {
+      "id": "35-DSCF0979",
+      "title": "DSCF0979",
+      "width": 7728,
+      "height": 5152,
+      "orientation": "landscape",
+      "web": "photos/35-DSCF0979.webp",
+      "thumb": "thumbs/35-DSCF0979-thumb.webp",
+      "original": "originals/35-DSCF0979.jpg",
+      "aspectRatio": 1.5
+    },
+    {
+      "id": "36-DSCF2267",
+      "title": "DSCF2267",
+      "width": 7728,
+      "height": 5152,
+      "orientation": "landscape",
+      "web": "photos/36-DSCF2267.webp",
+      "thumb": "thumbs/36-DSCF2267-thumb.webp",
+      "original": "originals/36-DSCF2267.jpg",
+      "aspectRatio": 1.5
+    },
+    {
+      "id": "37-DSCF0250",
+      "title": "DSCF0250",
+      "width": 7728,
+      "height": 5152,
+      "orientation": "landscape",
+      "web": "photos/37-DSCF0250.webp",
+      "thumb": "thumbs/37-DSCF0250-thumb.webp",
+      "original": "originals/37-DSCF0250.jpg",
+      "aspectRatio": 1.5
+    },
+    {
+      "id": "38-DSCF1049",
+      "title": "DSCF1049",
+      "width": 5152,
+      "height": 7728,
+      "orientation": "portrait",
+      "web": "photos/38-DSCF1049.webp",
+      "thumb": "thumbs/38-DSCF1049-thumb.webp",
+      "original": "originals/38-DSCF1049.jpg",
+      "aspectRatio": 0.667
+    },
+    {
+      "id": "39-DSCF1271",
+      "title": "DSCF1271",
+      "width": 5152,
+      "height": 7728,
+      "orientation": "portrait",
+      "web": "photos/39-DSCF1271.webp",
+      "thumb": "thumbs/39-DSCF1271-thumb.webp",
+      "original": "originals/39-DSCF1271.jpg",
+      "aspectRatio": 0.667
+    },
+    {
+      "id": "40-DSCF2381",
+      "title": "DSCF2381",
+      "width": 5152,
+      "height": 7728,
+      "orientation": "portrait",
+      "web": "photos/40-DSCF2381.webp",
+      "thumb": "thumbs/40-DSCF2381-thumb.webp",
+      "original": "originals/40-DSCF2381.jpg",
+      "aspectRatio": 0.667
+    },
+    {
+      "id": "41-DSCF0219",
+      "title": "DSCF0219",
+      "width": 5152,
+      "height": 7728,
+      "orientation": "portrait",
+      "web": "photos/41-DSCF0219.webp",
+      "thumb": "thumbs/41-DSCF0219-thumb.webp",
+      "original": "originals/41-DSCF0219.jpg",
+      "aspectRatio": 0.667
+    },
+    {
+      "id": "42-DSCF3428",
+      "title": "DSCF3428",
+      "width": 7728,
+      "height": 5152,
+      "orientation": "landscape",
+      "web": "photos/42-DSCF3428.webp",
+      "thumb": "thumbs/42-DSCF3428-thumb.webp",
+      "original": "originals/42-DSCF3428.jpg",
+      "aspectRatio": 1.5
+    },
+    {
+      "id": "43-DSCF0093",
+      "title": "DSCF0093",
+      "width": 7728,
+      "height": 5152,
+      "orientation": "landscape",
+      "web": "photos/43-DSCF0093.webp",
+      "thumb": "thumbs/43-DSCF0093-thumb.webp",
+      "original": "originals/43-DSCF0093.jpg",
+      "aspectRatio": 1.5
+    },
+    {
+      "id": "44-DSCF3292",
+      "title": "DSCF3292",
+      "width": 5152,
+      "height": 7728,
+      "orientation": "portrait",
+      "web": "photos/44-DSCF3292.webp",
+      "thumb": "thumbs/44-DSCF3292-thumb.webp",
+      "original": "originals/44-DSCF3292.jpg",
+      "aspectRatio": 0.667
+    },
+    {
+      "id": "45-DSCF3242",
+      "title": "DSCF3242",
+      "width": 7728,
+      "height": 5152,
+      "orientation": "landscape",
+      "web": "photos/45-DSCF3242.webp",
+      "thumb": "thumbs/45-DSCF3242-thumb.webp",
+      "original": "originals/45-DSCF3242.jpg",
+      "aspectRatio": 1.5
+    },
+    {
+      "id": "46-DSCF3383",
+      "title": "DSCF3383",
+      "width": 5152,
+      "height": 7728,
+      "orientation": "portrait",
+      "web": "photos/46-DSCF3383.webp",
+      "thumb": "thumbs/46-DSCF3383-thumb.webp",
+      "original": "originals/46-DSCF3383.jpg",
+      "aspectRatio": 0.667
+    },
+    {
+      "id": "47-DSCF0839",
+      "title": "DSCF0839",
+      "width": 7728,
+      "height": 5152,
+      "orientation": "landscape",
+      "web": "photos/47-DSCF0839.webp",
+      "thumb": "thumbs/47-DSCF0839-thumb.webp",
+      "original": "originals/47-DSCF0839.jpg",
+      "aspectRatio": 1.5
+    },
+    {
+      "id": "48-DSCF1995",
+      "title": "DSCF1995",
+      "width": 5152,
+      "height": 7728,
+      "orientation": "portrait",
+      "web": "photos/48-DSCF1995.webp",
+      "thumb": "thumbs/48-DSCF1995-thumb.webp",
+      "original": "originals/48-DSCF1995.jpg",
+      "aspectRatio": 0.667
+    },
+    {
+      "id": "49-DSCF3092",
+      "title": "DSCF3092",
+      "width": 5152,
+      "height": 7728,
+      "orientation": "portrait",
+      "web": "photos/49-DSCF3092.webp",
+      "thumb": "thumbs/49-DSCF3092-thumb.webp",
+      "original": "originals/49-DSCF3092.jpg",
+      "aspectRatio": 0.667
+    },
+    {
+      "id": "50-DSCF0278",
+      "title": "DSCF0278",
+      "width": 5152,
+      "height": 7728,
+      "orientation": "portrait",
+      "web": "photos/50-DSCF0278.webp",
+      "thumb": "thumbs/50-DSCF0278-thumb.webp",
+      "original": "originals/50-DSCF0278.jpg",
       "aspectRatio": 0.667
     }
   ]
