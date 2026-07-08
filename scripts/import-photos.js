@@ -8,7 +8,11 @@ const fs = require("fs");
 const path = require("path");
 const sharp = require("sharp");
 const { getExportSettings, exportPhotoFiles } = require("./export-utils");
-const { loadFamilyReferences, scoreFamilyPhoto } = require("./family-matcher");
+const {
+  loadFamilyReferences,
+  scoreFamilyPhoto,
+  getFamilyMatcher,
+} = require("./family-matcher-loader");
 
 const ROOT = path.join(__dirname, "..");
 const CONFIG = JSON.parse(fs.readFileSync(path.join(ROOT, "config.json"), "utf8"));
@@ -111,7 +115,7 @@ async function main() {
     if (matcher) {
       familyActive = true;
       console.log("Filtro famiglia attivo (Marco, Laura, Luca, Giorgia).");
-    } else {
+    } else if (getFamilyMatcher()) {
       console.warn("ATTENZIONE: nessun riferimento in config/family/ — import senza filtro famiglia.");
       console.warn('  Crea i riferimenti con: npm run family:setup -- marco "percorso/foto.jpg"');
     }

@@ -10,6 +10,15 @@ npm run import -- "C:\percorso\alla\tua\cartella\foto"
 npm run serve
 ```
 
+**Windows:** usa **Node.js 22 LTS** (non la v24). Con Node 24 il filtro volti opzionale non si installa.
+
+Se `npm install` fallisce per TensorFlow, elimina `node_modules` e reinstalla:
+
+```bash
+rmdir /s /q node_modules
+npm install
+```
+
 Apri http://localhost:3000
 
 ## Cosa fa l'import

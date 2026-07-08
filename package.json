@@ -6,13 +6,19 @@
   "scripts": {
     "import": "node scripts/import-photos.js",
     "family:setup": "node scripts/setup-family-refs.js",
+    "install:family": "npm install @tensorflow/tfjs-node@4.22.0 @vladmandic/face-api@1.7.15 canvas@3.2.3",
     "optimize": "node scripts/optimize-photos.js",
     "serve": "npx --yes serve public -l 3000"
   },
   "dependencies": {
+    "sharp": "^0.33.5"
+  },
+  "optionalDependencies": {
     "@tensorflow/tfjs-node": "^4.22.0",
     "@vladmandic/face-api": "^1.7.15",
-    "canvas": "^3.2.3",
-    "sharp": "^0.33.5"
+    "canvas": "^3.2.3"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
