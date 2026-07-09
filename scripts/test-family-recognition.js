@@ -147,7 +147,7 @@ async function main() {
     for (let i = 0; i < sample.length; i++) {
       const filePath = sample[i];
       const result = await scoreFamilyPhoto(filePath, { minMatches: FAMILY.minMatches ?? 1 });
-      if (result.skippedQuick) continue;
+      if (result.faceCount === 0 && result.familyScore === 0) continue;
       if (result.faceCount > 0) withFaces++;
       if (result.familyScore > 0) {
         familyHits++;
