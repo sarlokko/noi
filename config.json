@@ -10,7 +10,7 @@
     "matchThreshold": 0.62,
     "minMatches": 1,
     "matchDetectMaxSize": 640,
-    "useIndex": true,
+    "useIndex": true
   },
   "export": {
     "webMaxSize": 2200,
