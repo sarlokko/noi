@@ -214,6 +214,27 @@ function slug(name, i) {
   return `${String(i).padStart(2, "0")}-${base}`;
 }
 
+function photoBaseName(filePath) {
+  return path.basename(filePath, path.extname(filePath)).toUpperCase();
+}
+
+function pickFeatured(candidates) {
+  const featured = CONFIG.featuredPhotos;
+  if (!featured?.length) return null;
+
+  const byName = new Map(candidates.map((c) => [photoBaseName(c.filePath), c]));
+  const picked = [];
+
+  for (const name of featured) {
+    const key = name.toUpperCase();
+    const match = byName.get(key);
+    if (match) picked.push(match);
+    else console.warn(`ATTENZIONE: featured "${name}" non trovata nell'indice.`);
+  }
+
+  return picked.length ? picked : null;
+}
+
 async function buildGallery(index, familyActive) {
   let candidates = index.familyCandidates();
 
@@ -222,6 +243,12 @@ async function buildGallery(index, familyActive) {
       filePath,
       ...e,
     }));
+  }
+
+  const featured = pickFeatured(candidates);
+  if (featured) {
+    console.log(`Selezione manuale: ${featured.length} foto da featuredPhotos.`);
+    return featured;
   }
 
   for (const c of candidates) {

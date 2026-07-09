@@ -12,6 +12,7 @@
     "family:reset-index": "node scripts/reset-photo-index.js",
     "family:verify": "node scripts/verify-family.js",
     "family:test": "node scripts/test-family-recognition.js",
+    "gallery:featured": "node scripts/rebuild-featured-gallery.js",
     "optimize": "node scripts/optimize-photos.js",
     "serve": "npx --yes serve public -l 3000"
   },
