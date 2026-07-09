@@ -73,6 +73,18 @@ npm run family:setup -- --group "E:\foto\pisa.jpg" marco luca giorgia laura
 
 I file vanno in `config/family/` (marco.jpg, laura.jpg, luca.jpg, giorgia.jpg).
 
+**Aggiornare un riferimento** (es. Marco riconosciuto male):
+
+1. Salva la foto sul PC (es. `C:\Users\mvmc\Downloads\marco.jpg`)
+2. Su Windows, doppio click su `update-family-ref.bat marco "C:\Users\mvmc\Downloads\marco.jpg"`
+3. Oppure manualmente:
+   ```cmd
+   npm run family:setup -- marco "C:\percorso\marco.jpg"
+   npm run family:reset-index
+   npm run family:test
+   ```
+4. Poi rilancia `import-auto.bat` (serve re-indicizzare con il nuovo volto)
+
 ### Verifica riconoscimento (prima dell'import)
 
 ```bash

@@ -166,13 +166,33 @@ async function scoreFamilyCanvas(imgCanvas, options = {}) {
   }
 }
 
-async function extractReferenceFace(sourcePath, outPath) {
+async function detectBestFace(sourcePath) {
   await loadModels();
-  const faces = await detectFamilyFaces(sourcePath);
-  if (!faces.length) throw new Error(`Nessun volto in ${sourcePath}`);
-  const best = faces.reduce((a, b) => (a.detection.score > b.detection.score ? a : b));
-  const box = best.detection.box;
-  const img = await loadImageCanvas(sourcePath);
+  const normalized = await sharp(sourcePath).rotate().jpeg({ quality: 90 }).toBuffer();
+  const rotations = [0, 90, 180, 270];
+  let best = null;
+
+  for (const deg of rotations) {
+    const buffer =
+      deg === 0 ? normalized : await sharp(normalized).rotate(deg).jpeg({ quality: 90 }).toBuffer();
+    const faces = await detectFamilyFaces(buffer);
+    if (!faces.length) continue;
+    const top = faces.reduce((a, b) => (a.detection.score > b.detection.score ? a : b));
+    if (!best || top.detection.score > best.face.detection.score) {
+      best = { face: top, rotation: deg, buffer };
+    }
+  }
+
+  return best;
+}
+
+async function extractReferenceFace(sourcePath, outPath) {
+  const best = await detectBestFace(sourcePath);
+  if (!best) throw new Error(`Nessun volto in ${sourcePath} (provate anche rotazioni 0/90/180/270°)`);
+
+  const { face, rotation, buffer } = best;
+  const box = face.detection.box;
+  const img = await loadImageCanvas(buffer);
   const pad = Math.round(Math.max(box.width, box.height) * 0.3);
   const x = Math.max(0, Math.floor(box.x - pad));
   const y = Math.max(0, Math.floor(box.y - pad));
@@ -182,6 +202,9 @@ async function extractReferenceFace(sourcePath, outPath) {
   c.getContext("2d").drawImage(img, x, y, w, h, 0, 0, w, h);
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, c.toBuffer("image/jpeg", { quality: 0.92 }));
+  if (rotation !== 0) {
+    console.log(`  (foto ruotata di ${rotation}° per rilevare il volto)`);
+  }
 }
 
 module.exports = {
