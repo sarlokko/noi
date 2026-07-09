@@ -7,6 +7,7 @@ Sito vetrina per mostrare le migliori foto scattate con reflex.
 ```bash
 npm install
 npm run family:verify
+npm run family:test
 npm run import -- "C:\percorso\alla\tua\cartella\foto"
 npm run serve
 ```
@@ -49,6 +50,16 @@ npm run family:setup -- --group "E:\foto\pisa.jpg" marco luca giorgia laura
 ```
 
 I file vanno in `config/family/` (marco.jpg, laura.jpg, luca.jpg, giorgia.jpg).
+
+### Verifica riconoscimento (prima dell'import)
+
+```bash
+npm run family:test
+```
+
+Controlla che ogni riferimento si riconosca da solo (✅ marco.jpg → marco) e che nel campione compaiano foto famiglia. Il report va in `reports/family-test-report.txt`.
+
+Su Windows, doppio click su **`import-auto.bat`**: aggiorna il codice, verifica, testa e poi chiede conferma per l'import.
 
 ## Personalizza
 

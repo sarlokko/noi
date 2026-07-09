@@ -171,4 +171,5 @@ module.exports = {
   scoreFamilyPhoto,
   extractReferenceFace,
   loadModels,
+  detectFaces: detectFacesFull,
 };
