@@ -2,7 +2,14 @@
   "siteTitle": "Noi",
   "photographer": "Marco",
   "tagline": "Scatti selezionati — reflex",
+  "source": "amazon-photos",
   "sourceFolder": "E:\\100_FUJI",
+  "amazonPhotos": {
+    "cookiesFile": "config/amazon-photos-cookies.json",
+    "cacheDir": ".cache/amazon-photos",
+    "filters": "type:(PHOTOS)",
+    "downloadConcurrency": 4
+  },
   "maxGalleryPhotos": 50,
   "familyFilter": {
     "enabled": true,
@@ -10,7 +17,7 @@
     "matchThreshold": 0.62,
     "minMatches": 1,
     "matchDetectMaxSize": 640,
-    "useIndex": true,
+    "useIndex": true
   },
   "export": {
     "webMaxSize": 2200,

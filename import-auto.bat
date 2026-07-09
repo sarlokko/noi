@@ -57,6 +57,22 @@ if errorlevel 1 (
   goto :fine
 )
 
+for /f "delims=" %%S in ('node -e "console.log(JSON.parse(require('fs').readFileSync('config.json','utf8')).source||'local')"') do set "SOURCE_TYPE=%%S"
+
+if /i "%SOURCE_TYPE%"=="amazon-photos" (
+  echo.
+  echo Sorgente: Amazon Photos
+  if not exist "config\amazon-photos-cookies.json" (
+    echo [ERRORE] Cookie Amazon Photos mancanti.
+    echo Copia config\amazon-photos-cookies.example.json in config\amazon-photos-cookies.json
+    goto :fine
+  )
+  call npm run amazon:verify
+  if errorlevel 1 goto :fine
+  set "IMPORT_CMD=import:update"
+  goto :import_step
+)
+
 for /f "delims=" %%F in ('node -e "console.log(JSON.parse(require('fs').readFileSync('config.json','utf8')).sourceFolder)"') do set "SOURCE=%%F"
 
 if not exist "%SOURCE%" (
@@ -95,6 +111,37 @@ if errorlevel 1 (
   goto :fine
 )
 
+goto :done
+
+:import_step
+echo.
+echo [5/5] Import / aggiornamento gallery da Amazon Photos...
+echo.
+
+if exist ".cache\photo-index.json" (
+  echo Indice trovato — modalita' INCREMENTALE.
+  echo.
+  set /p CONFERMA=Avviare aggiornamento? [S/N]: 
+  if /i not "%CONFERMA%"=="S" goto :fine
+  call npm run import:update
+) else (
+  echo PRIMA VOLTA — sync Amazon + indicizzazione ^(puo' richiedere ore^).
+  echo.
+  set /p CONFERMA=Avviare indicizzazione? [S/N]: 
+  if /i not "%CONFERMA%"=="S" goto :fine
+  call npm run import:scan
+  echo.
+  set /p CONFERMA2=Indicizzazione finita. Creare gallery adesso? [S/N]: 
+  if /i not "%CONFERMA2%"=="S" goto :fine
+  call npm run import:update
+)
+
+if errorlevel 1 (
+  echo [ERRORE] Operazione fallita.
+  goto :fine
+)
+
+:done
 echo.
 echo ============================================
 echo  COMPLETATO
