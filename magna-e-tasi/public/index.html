@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Magna e tasi — ricette di cucina italiana, dal Veneto e oltre">
+  <meta name="theme-color" content="#c45c26">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Magna e tasi">
+  <title>Magna e tasi</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="hero-label">Cucina italiana</p>
+      <h1>Magna e tasi</h1>
+      <p class="hero-tagline">Ricette per mangiare bene e restare soddisfatti</p>
+    </div>
+  </header>
+
+  <div class="toolbar-wrap">
+    <div class="toolbar">
+      <div class="search-box">
+        <span class="search-icon" aria-hidden="true">🔍</span>
+        <input type="search" id="search" placeholder="Cerca ricetta o ingrediente…" autocomplete="off">
+      </div>
+      <div class="filters" id="filters" role="tablist" aria-label="Categorie"></div>
+    </div>
+  </div>
+
+  <main>
+    <p id="result-count" class="result-count" aria-live="polite"></p>
+    <div id="recipe-grid" class="recipe-grid"></div>
+    <div id="empty-state" class="empty-state hidden">
+      <p>Nessuna ricetta trovata.</p>
+      <button type="button" id="btn-reset" class="btn-secondary">Mostra tutte</button>
+    </div>
+  </main>
+
+  <div id="recipe-modal" class="modal hidden" aria-hidden="true" role="dialog" aria-labelledby="modal-title">
+    <div class="modal-backdrop" id="modal-backdrop"></div>
+    <article class="modal-panel">
+      <button type="button" id="modal-close" class="modal-close" aria-label="Chiudi">&times;</button>
+      <header class="modal-header">
+        <span id="modal-emoji" class="modal-emoji"></span>
+        <div>
+          <h2 id="modal-title"></h2>
+          <p id="modal-description" class="modal-description"></p>
+        </div>
+      </header>
+      <div class="modal-meta" id="modal-meta"></div>
+      <div class="modal-tags" id="modal-tags"></div>
+      <section class="modal-section">
+        <h3>Ingredienti</h3>
+        <ul id="modal-ingredients"></ul>
+      </section>
+      <section class="modal-section">
+        <h3>Procedimento</h3>
+        <ol id="modal-steps"></ol>
+      </section>
+    </article>
+  </div>
+
+  <footer class="footer">
+    <p>&copy; <span id="year"></span> Magna e tasi — Buon appetito!</p>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

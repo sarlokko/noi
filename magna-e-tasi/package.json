@@ -1,0 +1,12 @@
+{
+  "name": "magna-e-tasi",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Magna e tasi — ricette di cucina italiana",
+  "scripts": {
+    "serve": "npx --yes serve public -l 3001"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

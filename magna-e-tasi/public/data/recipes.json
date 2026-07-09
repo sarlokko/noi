@@ -1,0 +1,229 @@
+{
+  "updated": "2026-07-09",
+  "recipes": [
+    {
+      "id": "bigoli-salsa",
+      "title": "Bigoli in salsa",
+      "category": "primi",
+      "difficulty": "media",
+      "prepMinutes": 20,
+      "cookMinutes": 40,
+      "servings": 4,
+      "tags": ["veneto", "pesce", "tradizione"],
+      "description": "Piatto simbolo veneziano: bigoli grossi con salsa di cipolla e acciughe, semplice e profumato.",
+      "ingredients": [
+        "400 g bigoli (o spaghetti grossi)",
+        "6 cipolle bianche medie",
+        "12 filetti di acciuga sotto sale",
+        "3 cucchiai olio extravergine",
+        "1 bicchiere vino bianco secco",
+        "Pepe nero",
+        "Sale"
+      ],
+      "steps": [
+        "Affetta le cipolle molto fini e falla appassire a fuoco basso con l'olio per almeno 30 minuti, mescolando spesso.",
+        "Aggiungi le acciughe sbriciolate e lasciale sciogliere nella cipolla.",
+        "Sfuma con il vino bianco e lascia evaporare.",
+        "Cuoci i bigoli in abbondante acqua salata, scola al dente e condisci con la salsa.",
+        "Servi con pepe nero macinato al momento."
+      ],
+      "emoji": "🍝"
+    },
+    {
+      "id": "risotto-radicchio",
+      "title": "Risotto al radicchio di Treviso",
+      "category": "primi",
+      "difficulty": "media",
+      "prepMinutes": 15,
+      "cookMinutes": 22,
+      "servings": 4,
+      "tags": ["veneto", "vegetariano"],
+      "description": "Cremoso e leggermente amarognolo, perfetto in inverno con il radicchio IGP.",
+      "ingredients": [
+        "320 g riso Vialone Nano o Carnaroli",
+        "2 radicchi di Treviso",
+        "1 cipolla",
+        "1 l brodo vegetale caldo",
+        "80 g burro",
+        "60 g Parmigiano grattugiato",
+        "1 bicchiere vino rosso",
+        "Olio, sale, pepe"
+      ],
+      "steps": [
+        "Taglia il radicchio a listarelle sottili.",
+        "In una casseruola, soffriggi la cipolla tritata con un filo d'olio, poi aggiungi metà del radicchio.",
+        "Tosta il riso, sfuma con il vino rosso e cuoci aggiungendo il brodo un mestolo alla volta.",
+        "A metà cottura incorpora il radicchio restante.",
+        "Manteca con burro e Parmigiano, regola di sale e servi subito."
+      ],
+      "emoji": "🍚"
+    },
+    {
+      "id": "polenta-schie",
+      "title": "Polenta e schie",
+      "category": "secondi",
+      "difficulty": "facile",
+      "prepMinutes": 10,
+      "cookMinutes": 45,
+      "servings": 4,
+      "tags": ["veneto", "pesce", "tradizione"],
+      "description": "Gamberetti di laguna saltati all'aglio su polenta morbida: un classico della cucina veneziana.",
+      "ingredients": [
+        "400 g farina di polenta",
+        "500 g schie (gamberetti di laguna) o gamberetti",
+        "4 spicchi d'aglio",
+        "Prezzemolo fresco",
+        "Olio extravergine",
+        "Sale"
+      ],
+      "steps": [
+        "Cuoci la polenta seguendo le indicazioni della confezione fino a consistenza morbida.",
+        "Pulisci le schie e asciugale bene.",
+        "In padella, rosola l'aglio nell'olio senza bruciarlo, aggiungi le schie e saltale 2-3 minuti.",
+        "Completa con prezzemolo tritato e un filo d'olio a crudo.",
+        "Versa la polenta nei piatti e adagia le schie sopra."
+      ],
+      "emoji": "🦐"
+    },
+    {
+      "id": "fegato-veneziana",
+      "title": "Fegato alla veneziana",
+      "category": "secondi",
+      "difficulty": "media",
+      "prepMinutes": 20,
+      "cookMinutes": 15,
+      "servings": 4,
+      "tags": ["veneto", "carne", "tradizione"],
+      "description": "Fegato di vitello con cipolle dolci, cotto velocemente per restare tenero.",
+      "ingredients": [
+        "600 g fegato di vitello",
+        "4 cipolle bianche grandi",
+        "50 g burro",
+        "2 cucchiai olio",
+        "1 cucchiaio aceto di vino bianco",
+        "Sale e pepe"
+      ],
+      "steps": [
+        "Affetta le cipolle a rondelle sottili e cuocile nel burro a fuoco basso finché sono molto morbide.",
+        "Taglia il fegato a fettine sottili e asciugale.",
+        "In padella calda con olio, cuoci il fegato 2-3 minuti per lato.",
+        "Unisci le cipolle, sfuma con l'aceto, aggiusta di sale e pepe.",
+        "Servi immediatamente con polenta o crostini."
+      ],
+      "emoji": "🥩"
+    },
+    {
+      "id": "cicchetti-polpette",
+      "title": "Polpette per cicchetti",
+      "category": "antipasti",
+      "difficulty": "facile",
+      "prepMinutes": 25,
+      "cookMinutes": 20,
+      "servings": 6,
+      "tags": ["veneto", "aperitivo"],
+      "description": "Piccole polpette morbide, ideali con un ombra di vino in bacaro.",
+      "ingredients": [
+        "300 g carne mista macinata",
+        "1 uovo",
+        "50 g Parmigiano grattugiato",
+        "50 g pangrattato",
+        "1 spicchio d'aglio",
+        "Prezzemolo",
+        "Olio per friggere",
+        "Sale e pepe"
+      ],
+      "steps": [
+        "Mescola carne, uovo, Parmigiano, pangrattato, aglio tritato e prezzemolo.",
+        "Forma polpette piccole (come noci).",
+        "Friggi in olio caldo fino a doratura uniforme.",
+        "Asciuga su carta assorbente e servi calde con limone."
+      ],
+      "emoji": "🍢"
+    },
+    {
+      "id": "tiramisu-classico",
+      "title": "Tiramisù classico",
+      "category": "dolci",
+      "difficulty": "facile",
+      "prepMinutes": 30,
+      "cookMinutes": 0,
+      "servings": 8,
+      "tags": ["veneto", "dolce", "senza-cottura"],
+      "description": "Il dolce più amato del Veneto: mascarpone, caffè e cacao, da preparare il giorno prima.",
+      "ingredients": [
+        "500 g mascarpone",
+        "4 uova freschissime",
+        "100 g zucchero",
+        "300 g savoiardi",
+        "300 ml caffè espresso freddo",
+        "Cacao amaro in polvere",
+        "Marsala o rum (opzionale)"
+      ],
+      "steps": [
+        "Separa tuorli e albumi. Monta i tuorli con lo zucchero fino a crema chiara.",
+        "Incorpora il mascarpone ai tuorli.",
+        "Monta gli albumi a neve ferma e uniscili delicatamente al composto.",
+        "Inzuppa i savoiardi nel caffè freddo (non troppo) e disponi uno strato in teglia.",
+        "Copri con crema, ripeti gli strati e termina con cacao abbondante.",
+        "Riposa in frigo almeno 6 ore."
+      ],
+      "emoji": "🍰"
+    },
+    {
+      "id": "pasta-fagioli",
+      "title": "Pasta e fagioli",
+      "category": "primi",
+      "difficulty": "facile",
+      "prepMinutes": 15,
+      "cookMinutes": 50,
+      "servings": 4,
+      "tags": ["italiano", "comfort", "vegetariano"],
+      "description": "Zuppa densa e confortante, con fagioli cannellini e ditalini.",
+      "ingredients": [
+        "200 g fagioli cannellini secchi (o 2 lattine)",
+        "150 g ditalini",
+        "1 cipolla",
+        "1 costa di sedano",
+        "1 carota",
+        "2 spicchi d'aglio",
+        "3 cucchiai olio extravergine",
+        "Rosmarino",
+        "Sale e pepe"
+      ],
+      "steps": [
+        "Se usi fagioli secchi, lessali fino a morbidezza.",
+        "Soffriggi cipolla, sedano e carota tritati con olio e aglio.",
+        "Aggiungi i fagioli con parte del loro brodo e frulla metà per cremosità.",
+        "Cuoci la pasta nel composto, aggiungendo acqua o brodo se necessario.",
+        "Servi con olio a crudo, pepe e rosmarino."
+      ],
+      "emoji": "🫘"
+    },
+    {
+      "id": "insalata-rucola",
+      "title": "Insalata di rucola e grana",
+      "category": "contorni",
+      "difficulty": "facile",
+      "prepMinutes": 10,
+      "cookMinutes": 0,
+      "servings": 4,
+      "tags": ["vegetariano", "veloce"],
+      "description": "Contorno fresco e croccante, pronto in pochi minuti.",
+      "ingredients": [
+        "200 g rucola",
+        "80 g scaglie di Grana Padano",
+        "Pomodorini ciliegino",
+        "Olio extravergine",
+        "Aceto balsamico",
+        "Sale"
+      ],
+      "steps": [
+        "Lava e asciuga la rucola.",
+        "Taglia i pomodorini a metà.",
+        "Condisci con olio, aceto e sale.",
+        "Completa con scaglie di grana e servi subito."
+      ],
+      "emoji": "🥗"
+    }
+  ]
+}

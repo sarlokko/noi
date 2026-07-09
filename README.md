@@ -2,6 +2,10 @@
 
 Sito vetrina per mostrare le migliori foto scattate con reflex.
 
+## Altri progetti
+
+- **[Magna e tasi](magna-e-tasi/)** — sito/app per ricette di cucina italiana
+
 ## Setup
 
 ```bash
