@@ -1,10 +1,10 @@
 /**
- * Importa foto da cartella reflex.
+ * Importa foto da cartella reflex o Amazon Photos.
  *
  * Modalità:
- *   npm run import -- "E:\100_FUJI"          import completo (usa indice)
- *   npm run import:scan -- "E:\100_FUJI"     solo indicizza (prima volta / overnight)
- *   npm run import:update                      solo foto nuove + aggiorna gallery
+ *   npm run import -- "E:\100_FUJI"          import completo (cartella locale)
+ *   npm run import:scan                      indicizza (Amazon se source=amazon-photos)
+ *   npm run import:update                    solo foto nuove + aggiorna gallery
  */
 
 const fs = require("fs");
@@ -18,26 +18,48 @@ const {
   scoreFamilyPhoto,
   getFamilyMatcher,
 } = require("./family-matcher-loader");
+const { syncAmazonPhotos } = require("./amazon-photos-sync");
 
 const ROOT = path.join(__dirname, "..");
 const CONFIG = JSON.parse(fs.readFileSync(path.join(ROOT, "config.json"), "utf8"));
 const EXT = new Set([".jpg", ".jpeg", ".png", ".webp", ".tif", ".tiff"]);
 const FAMILY = CONFIG.familyFilter || {};
+const AMAZON_SOURCE = CONFIG.source === "amazon-photos";
 
 function parseArgs() {
   const args = process.argv.slice(2);
   const mode = args.includes("--scan") ? "scan" : args.includes("--update") ? "update" : "import";
+  const noSync = args.includes("--no-sync");
   const folder = args.find((a) => !a.startsWith("--")) || CONFIG.sourceFolder;
-  return { mode, folder };
+  return { mode, folder, noSync };
 }
 
-const { mode, folder: sourceArg } = parseArgs();
+const { mode, folder: sourceArg, noSync } = parseArgs();
 
-if (!sourceArg || !fs.existsSync(sourceArg)) {
-  console.error("Specifica la cartella foto:");
-  console.error('  npm run import -- "E:\\100_FUJI"');
-  console.error('  npm run import:scan -- "E:\\100_FUJI"');
-  process.exit(1);
+async function resolveSourceFolder() {
+  if (AMAZON_SOURCE) {
+    if (!noSync) {
+      console.log("Sorgente: Amazon Photos — sync in corso...");
+      const { cacheDir, files } = await syncAmazonPhotos();
+      console.log(`Cache locale: ${files.length} foto in ${cacheDir}\n`);
+      return cacheDir;
+    }
+    const cacheDir = path.resolve(ROOT, CONFIG.amazonPhotos?.cacheDir || ".cache/amazon-photos");
+    if (!fs.existsSync(cacheDir)) {
+      console.error("Cache Amazon Photos assente. Esegui prima: npm run amazon:sync");
+      process.exit(1);
+    }
+    return cacheDir;
+  }
+
+  if (!sourceArg || !fs.existsSync(sourceArg)) {
+    console.error("Specifica la cartella foto:");
+    console.error('  npm run import -- "E:\\100_FUJI"');
+    console.error('  npm run import:scan -- "E:\\100_FUJI"');
+    console.error("Oppure imposta \"source\": \"amazon-photos\" in config.json");
+    process.exit(1);
+  }
+  return sourceArg;
 }
 
 const OUT = {
@@ -244,9 +266,10 @@ async function buildGallery(index, familyActive) {
 }
 
 async function main() {
+  const sourceFolder = await resolveSourceFolder();
   const familyEnabled = FAMILY.enabled !== false;
   let familyActive = false;
-  const index = new PhotoIndex(sourceArg, FAMILY.useIndex !== false);
+  const index = new PhotoIndex(sourceFolder, FAMILY.useIndex !== false);
   const familyOpts = { minMatches: FAMILY.minMatches ?? 1 };
 
   if (familyEnabled && getFamilyMatcher()) {
@@ -267,10 +290,11 @@ async function main() {
     }
   }
 
-  console.log("Cartella:", sourceArg);
+  console.log("Sorgente:", AMAZON_SOURCE ? "Amazon Photos" : "cartella locale");
+  console.log("Cartella:", sourceFolder);
   console.log("Modalità:", mode === "scan" ? "indicizzazione" : mode === "update" ? "aggiornamento incrementale" : "import completo");
 
-  const all = walk(sourceArg);
+  const all = walk(sourceFolder);
   console.log(`Trovate ${all.length} immagini.`);
 
   index.pruneMissing(all);

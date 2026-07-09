@@ -8,7 +8,27 @@ Sito vetrina per mostrare le migliori foto scattate con reflex.
 npm install
 npm run family:verify
 npm run family:test
+```
+
+### Sorgente foto
+
+**Amazon Photos** (consigliato se le reflex sono già caricate):
+
+1. Crea il file cookie: `npm run amazon:setup` (oppure su Windows: `copy config\amazon-photos-cookies.example.json config\amazon-photos-cookies.json`)
+2. Accedi a [amazon.it/photos](https://www.amazon.it/photos), apri DevTools (F12) → Application → Cookies → `amazon.it`
+3. Copia i valori di `ubid-acbit`, `at-acbit` e `session-id`
+4. In `config.json` imposta `"source": "amazon-photos"`
+5. Verifica: `npm run amazon:verify`
+6. Import: `npm run import:scan` (prima volta) poi `npm run import:update`
+
+**Cartella locale** (scheda reflex / disco):
+
+```bash
+# In config.json: "source": "local" oppure ometti "source"
 npm run import -- "C:\percorso\alla\tua\cartella\foto"
+```
+
+```bash
 npm run serve
 ```
 
@@ -16,7 +36,7 @@ Apri http://localhost:3000
 
 ## Cosa fa l'import
 
-1. Scansiona tutte le JPG/PNG/TIF nella cartella (anche sottocartelle)
+1. **Amazon Photos**: scarica le foto in `.cache/amazon-photos/` (sync incrementale), oppure scansiona la cartella locale
 2. **Filtra solo la famiglia** (Marco, Laura, Luca, Giorgia) con pre-filtro veloce + cache
 3. **Seleziona automaticamente** le migliori (risoluzione, nitidezza, qualità file)
 4. Genera versioni **web** (WebP), **anteprime** e copia **originali** per stampa
@@ -24,17 +44,22 @@ Apri http://localhost:3000
 
 ### Velocità import (filtro famiglia)
 
-**Problema:** analizzare ~3000 foto con riconoscimento volti richiede ore.
+**Problema:** analizzare migliaia di foto con riconoscimento volti richiede ore.
 
 **Soluzione — indice incrementale:**
 
 | Comando | Quando usarlo | Tempo |
 |---------|---------------|-------|
-| `npm run import:scan -- "E:\100_FUJI"` | Prima volta (indicizza tutto) | 1–2 ore, una sola volta |
+| `npm run import:scan` | Prima volta (indicizza tutto) | 1–2 ore, una sola volta |
 | `npm run import:update` | Ogni mese con nuove foto | **pochi minuti** |
+| `npm run amazon:sync` | Solo scaricare da Amazon (senza gallery) | dipende da quante nuove |
 | `import-auto.bat` | Doppio click — sceglie automaticamente | scan o update |
 
 L'indice resta in `.cache/photo-index.json`. Se interrompi la scansione, riprende da dove era (salva ogni 50 foto).
+
+### Cookie Amazon Photos
+
+I cookie di sessione scadono periodicamente. Se vedi errori 401, aggiorna `config/amazon-photos-cookies.json` con valori freschi dal browser. Il file è in `.gitignore` e non va mai committato.
 
 ### Riferimenti famiglia (opzionale ma consigliato)
 
@@ -47,6 +72,18 @@ npm run family:setup -- --group "E:\foto\pisa.jpg" marco luca giorgia laura
 ```
 
 I file vanno in `config/family/` (marco.jpg, laura.jpg, luca.jpg, giorgia.jpg).
+
+**Aggiornare un riferimento** (es. Marco riconosciuto male):
+
+1. Salva la foto sul PC (es. `C:\Users\mvmc\Downloads\marco.jpg`)
+2. Su Windows, doppio click su `update-family-ref.bat marco "C:\Users\mvmc\Downloads\marco.jpg"`
+3. Oppure manualmente:
+   ```cmd
+   npm run family:setup -- marco "C:\percorso\marco.jpg"
+   npm run family:reset-index
+   npm run family:test
+   ```
+4. Poi rilancia `import-auto.bat` (serve re-indicizzare con il nuovo volto)
 
 ### Verifica riconoscimento (prima dell'import)
 
@@ -61,6 +98,8 @@ Su Windows, doppio click su **`import-auto.bat`**: aggiorna il codice, verifica,
 ## Personalizza
 
 Modifica `config.json` e `public/config.json`:
+- `source` — `"amazon-photos"` o cartella locale (ometti o `"local"`)
+- `amazonPhotos.cookiesFile` — percorso cookie (default `config/amazon-photos-cookies.json`)
 - `siteTitle` — titolo del sito
 - `photographer` — tuo nome
 - `tagline` — sottotitolo

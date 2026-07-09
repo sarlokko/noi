@@ -1,6 +1,7 @@
 node_modules/
 .cache/
 reports/
+config/amazon-photos-cookies.json
 .DS_Store
 Thumbs.db
 /data/
