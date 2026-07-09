@@ -34,9 +34,23 @@ async function scoreFamilyPhoto(filePath, options) {
   return mod.scoreFamilyPhoto(filePath, options);
 }
 
+async function scoreFamilyCanvas(imgCanvas, options) {
+  const mod = getFamilyMatcher();
+  if (!mod) return { familyScore: 0, members: [], faceCount: 0 };
+  return mod.scoreFamilyCanvas(imgCanvas, options);
+}
+
+async function loadImageCanvas(filePath, maxSize) {
+  const mod = getFamilyMatcher();
+  if (!mod) return null;
+  return mod.loadImageCanvas(filePath, maxSize);
+}
+
 module.exports = {
   configureFamilyMatcher,
   loadFamilyReferences,
   scoreFamilyPhoto,
+  scoreFamilyCanvas,
+  loadImageCanvas,
   getFamilyMatcher,
 };

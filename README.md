@@ -24,20 +24,17 @@ Apri http://localhost:3000
 
 ### Velocità import (filtro famiglia)
 
-L'analisi di ~3000 foto richiedeva 1–2 ore; ora usa tre accellerazioni:
+**Problema:** analizzare ~3000 foto con riconoscimento volti richiede ore.
 
-1. **Pre-filtro volti** — TinyFaceDetector a bassa risoluzione (512px) scarta paesaggi e foto senza volti in millisecondi
-2. **Parallelismo** — analizza più foto in parallelo (`concurrency` in `config.json`, default 4)
-3. **Cache** — risultati salvati in `.cache/family-scores.json`; un secondo import salta le foto già analizzate
+**Soluzione — indice incrementale:**
 
-Tempi indicativi su PC medio: **15–40 min** al primo giro, **pochi minuti** se rilanci con cache attiva.
+| Comando | Quando usarlo | Tempo |
+|---------|---------------|-------|
+| `npm run import:scan -- "E:\100_FUJI"` | Prima volta (indicizza tutto) | 1–2 ore, una sola volta |
+| `npm run import:update` | Ogni mese con nuove foto | **pochi minuti** |
+| `import-auto.bat` | Doppio click — sceglie automaticamente | scan o update |
 
-Se `git pull` è lento, è perché `public/` contiene molte immagini. Per aggiornare solo gli script:
-
-```bash
-git pull --depth 1
-# oppure, dopo il primo clone completo, evita di committare public/ finché la gallery non è pronta
-```
+L'indice resta in `.cache/photo-index.json`. Se interrompi la scansione, riprende da dove era (salva ogni 50 foto).
 
 ### Riferimenti famiglia (opzionale ma consigliato)
 
@@ -68,8 +65,8 @@ Modifica `config.json` e `public/config.json`:
 - `photographer` — tuo nome
 - `tagline` — sottotitolo
 - `maxGalleryPhotos` — quante foto in vetrina (default 50)
-- `familyFilter.concurrency` — foto analizzate in parallelo (default 4)
-- `familyFilter.useCache` — riusa analisi precedenti (default true)
+- `familyFilter.useIndex` — indice incrementale (default true)
+- `familyFilter.matchDetectMaxSize` — risoluzione analisi volti (default 640)
 
 ## Stampa
 

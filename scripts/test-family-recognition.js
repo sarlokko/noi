@@ -81,8 +81,7 @@ async function main() {
   }
 
   configureFamilyMatcher({
-    quickDetectMaxSize: FAMILY.quickDetectMaxSize ?? 512,
-    matchDetectMaxSize: FAMILY.matchDetectMaxSize ?? 1024,
+    matchDetectMaxSize: FAMILY.matchDetectMaxSize ?? 640,
   });
 
   const refDir = path.resolve(ROOT, FAMILY.referenceDir || "config/family");
@@ -125,7 +124,7 @@ async function main() {
   for (const file of refFiles) {
     const name = path.basename(file, path.extname(file)).toLowerCase();
     const full = path.join(refDir, file);
-    const result = await scoreFamilyPhoto(full, { minMatches: 1, skipQuick: true });
+    const result = await scoreFamilyPhoto(full, { minMatches: 1 });
     const ok = result.members.includes(name);
     const icon = ok ? "✅" : "❌";
     log(`${icon} ${file} → riconosciuto come: ${result.members.join(", ") || "nessuno"} (volti: ${result.faceCount})`);
@@ -148,7 +147,7 @@ async function main() {
     for (let i = 0; i < sample.length; i++) {
       const filePath = sample[i];
       const result = await scoreFamilyPhoto(filePath, { minMatches: FAMILY.minMatches ?? 1 });
-      if (result.skippedQuick) continue;
+      if (result.faceCount === 0 && result.familyScore === 0) continue;
       if (result.faceCount > 0) withFaces++;
       if (result.familyScore > 0) {
         familyHits++;
