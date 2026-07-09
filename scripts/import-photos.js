@@ -214,6 +214,14 @@ function slug(name, i) {
   return `${String(i).padStart(2, "0")}-${base}`;
 }
 
+function photoBaseName(filePath) {
+  return path.basename(filePath, path.extname(filePath)).toUpperCase();
+}
+
+function excludedPhotoNames() {
+  return new Set((CONFIG.excludePhotos || []).map((name) => name.toUpperCase()));
+}
+
 async function buildGallery(index, familyActive) {
   let candidates = index.familyCandidates();
 
@@ -222,6 +230,13 @@ async function buildGallery(index, familyActive) {
       filePath,
       ...e,
     }));
+  }
+
+  const excluded = excludedPhotoNames();
+  if (excluded.size) {
+    const before = candidates.length;
+    candidates = candidates.filter((c) => !excluded.has(photoBaseName(c.filePath)));
+    console.log(`Escluse ${before - candidates.length} foto da excludePhotos.`);
   }
 
   for (const c of candidates) {

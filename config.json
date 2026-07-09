@@ -4,6 +4,19 @@
   "tagline": "Scatti selezionati — reflex",
   "sourceFolder": "E:\\100_FUJI",
   "maxGalleryPhotos": 50,
+  "excludePhotos": [
+    "DSCF2521",
+    "DSCF2788",
+    "DSCF0707",
+    "DSCF0706",
+    "DSCF2292",
+    "DSCF2791",
+    "DSCF2793",
+    "DSCF2790",
+    "DSCF0976",
+    "DSCF2789",
+    "DSCF0555"
+  ],
   "familyFilter": {
     "enabled": true,
     "referenceDir": "config/family",
