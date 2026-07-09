@@ -30,8 +30,8 @@
       "emoji": "🍝",
       "video": {
         "type": "youtube",
-        "id": "8oDkv8uLqZg",
-        "caption": "Preparazione della pasta fresca — tecnica di base"
+        "id": "5pwpRuWbvJY",
+        "caption": "Video YouTube — Bigoli in salsa, ricetta tradizionale"
       }
     },
     {
@@ -64,8 +64,8 @@
       "emoji": "🍚",
       "video": {
         "type": "youtube",
-        "id": "mU6I25n3U4s",
-        "caption": "Tecnica del risotto mantecato"
+        "id": "CpV8VE4Q4dY",
+        "caption": "Video YouTube — Risotto al radicchio"
       }
     },
     {
@@ -96,8 +96,8 @@
       "emoji": "🦐",
       "video": {
         "type": "youtube",
-        "id": "1D9PikBzNMI",
-        "caption": "Cottura dei gamberetti in padella"
+        "id": "hUL3u2Cx5cE",
+        "caption": "Video YouTube — Polenta al brodo di gamberi"
       }
     },
     {
@@ -128,8 +128,8 @@
       "emoji": "🥩",
       "video": {
         "type": "youtube",
-        "id": "rB5jR6x9p0Y",
-        "caption": "Cottura veloce delle carni in padella"
+        "id": "Mi6CudRjQTg",
+        "caption": "Video YouTube — Fegato alla veneziana tradizionale"
       }
     },
     {
@@ -161,8 +161,8 @@
       "emoji": "🍢",
       "video": {
         "type": "youtube",
-        "id": "4aZr5hmdXPo",
-        "caption": "Preparazione e frittura delle polpette"
+        "id": "qn5vk9MgcAY",
+        "caption": "Video YouTube — Polpette fritte di carne"
       }
     },
     {
@@ -195,8 +195,8 @@
       "emoji": "🍰",
       "video": {
         "type": "youtube",
-        "id": "6VeluS7i0AA",
-        "caption": "Montaggio del tiramisù classico"
+        "id": "XXirNdodlX0",
+        "caption": "Video YouTube — Tiramisù, ricetta originale"
       }
     },
     {
@@ -230,8 +230,8 @@
       "emoji": "🫘",
       "video": {
         "type": "youtube",
-        "id": "LxXK9fj3X2E",
-        "caption": "Preparazione di una zuppa di legumi"
+        "id": "Q19NqUX5CJ4",
+        "caption": "Video YouTube — Pasta e fagioli con Gennaro Contaldo"
       }
     },
     {
@@ -261,8 +261,74 @@
       "emoji": "🥗",
       "video": {
         "type": "youtube",
-        "id": "qC3J9zDqY0E",
-        "caption": "Composizione di un'insalata fresca"
+        "id": "JdIB8NHDVWQ",
+        "caption": "Video YouTube — Insalata rucola e parmigiano"
+      }
+    },
+    {
+      "id": "baccala-mantecato",
+      "title": "Baccalà mantecato",
+      "category": "antipasti",
+      "difficulty": "media",
+      "prepMinutes": 30,
+      "cookMinutes": 20,
+      "servings": 6,
+      "tags": ["veneto", "pesce", "tradizione"],
+      "description": "Crema vellutata di baccalà montato con olio, servita su crostini o polenta.",
+      "ingredients": [
+        "500 g baccalà ammollato",
+        "200 ml olio extravergine",
+        "1 spicchio d'aglio",
+        "Latte q.b.",
+        "Pepe bianco",
+        "Prezzemolo"
+      ],
+      "steps": [
+        "Lessa il baccalà in acqua per 15 minuti, poi scolalo e rimuovi pelle e lische.",
+        "Frulla il baccalà con un filo d'olio fino a ottenere una crema.",
+        "Monta aggiungendo olio a filo, come per una maionese, fino a consistenza spumosa.",
+        "Regola con un goccio di latte se troppo denso, sale e pepe.",
+        "Servi su crostini caldi o con polenta, con prezzemolo."
+      ],
+      "emoji": "🐟",
+      "video": {
+        "type": "youtube",
+        "id": "lVOKbp0JiaU",
+        "caption": "Video YouTube — Baccalà mantecato"
+      }
+    },
+    {
+      "id": "sarde-saor",
+      "title": "Sarde in saor",
+      "category": "antipasti",
+      "difficulty": "media",
+      "prepMinutes": 30,
+      "cookMinutes": 25,
+      "servings": 4,
+      "tags": ["veneto", "pesce", "tradizione"],
+      "description": "Sardine fritte con cipolle in agrodolce, pinoli e uvetta: antipasto veneziano per eccellenza.",
+      "ingredients": [
+        "600 g sardine fresche",
+        "3 cipolle bianche",
+        "200 ml aceto di vino bianco",
+        "50 g uvetta",
+        "30 g pinoli",
+        "Farina",
+        "Olio per friggere",
+        "Sale"
+      ],
+      "steps": [
+        "Pulisci le sardine, infarinale leggermente e friggi in olio caldo fino a doratura.",
+        "Affetta le cipolle e cuocile a fuoco basso con aceto fino a morbidezza.",
+        "Aggiungi uvetta ammollata e pinoli tostati alla cipolla.",
+        "Alterna in un contenitore strati di sardine e cipolle in agrodolce.",
+        "Lascia marinare almeno 24 ore in frigo prima di servire."
+      ],
+      "emoji": "🐟",
+      "video": {
+        "type": "youtube",
+        "id": "MmqVNU8ko3o",
+        "caption": "Video YouTube — Sarde in saor"
       }
     }
   ]

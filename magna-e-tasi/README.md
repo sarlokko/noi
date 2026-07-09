@@ -49,7 +49,9 @@ Modifica `public/data/recipes.json` e aggiungi un oggetto con:
 }
 ```
 
-Per video locali usa `"type": "mp4"` e `"src": "videos/nome.mp4"`.
+Per video propri: `"type": "mp4"`, `"src": "videos/nome.mp4"`.
+
+Per provare l'app, le 10 ricette includono video tutorial da YouTube (placeholder da sostituire con i tuoi quando pronti).
 
 ## Pubblicazione
 
