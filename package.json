@@ -7,6 +7,7 @@
     "import": "node scripts/import-photos.js",
     "import:scan": "node scripts/import-photos.js --scan",
     "import:update": "node scripts/import-photos.js --update",
+    "amazon:setup": "node scripts/setup-amazon-cookies.js",
     "amazon:sync": "node scripts/amazon-photos-sync.js",
     "amazon:verify": "node scripts/verify-amazon-photos.js",
     "family:setup": "node scripts/setup-family-refs.js",

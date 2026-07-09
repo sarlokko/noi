@@ -63,8 +63,11 @@ if /i "%SOURCE_TYPE%"=="amazon-photos" (
   echo.
   echo Sorgente: Amazon Photos
   if not exist "config\amazon-photos-cookies.json" (
-    echo [ERRORE] Cookie Amazon Photos mancanti.
-    echo Copia config\amazon-photos-cookies.example.json in config\amazon-photos-cookies.json
+    echo Cookie Amazon Photos mancanti — creazione da template...
+    call npm run amazon:setup
+    echo.
+    echo Apri config\amazon-photos-cookies.json e inserisci i cookie da amazon.it/photos
+    echo Poi rilancia import-auto.bat
     goto :fine
   )
   call npm run amazon:verify

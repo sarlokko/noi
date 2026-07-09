@@ -14,7 +14,7 @@ npm run family:test
 
 **Amazon Photos** (consigliato se le reflex sono già caricate):
 
-1. Copia `config/amazon-photos-cookies.example.json` → `config/amazon-photos-cookies.json`
+1. Crea il file cookie: `npm run amazon:setup` (oppure su Windows: `copy config\amazon-photos-cookies.example.json config\amazon-photos-cookies.json`)
 2. Accedi a [amazon.it/photos](https://www.amazon.it/photos), apri DevTools (F12) → Application → Cookies → `amazon.it`
 3. Copia i valori di `ubid-acbit`, `at-acbit` e `session-id`
 4. In `config.json` imposta `"source": "amazon-photos"`
