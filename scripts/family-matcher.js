@@ -14,11 +14,13 @@ faceapi.env.monkeyPatch({ Canvas: canvas.Canvas, Image: canvas.Image });
 
 const ROOT = path.join(__dirname, "..");
 const MODEL_PATH = path.join(ROOT, "node_modules/@vladmandic/face-api/model");
+const MIN_REF_SIZE = 400;
 
 const SETTINGS = {
   detectMaxSize: 640,
   tinyInputSize: 416,
   tinyScoreThreshold: 0.35,
+  refScoreThreshold: 0.2,
   minConfidence: 0.45,
 };
 
@@ -60,19 +62,84 @@ async function loadImageCanvas(source, maxSize = SETTINGS.detectMaxSize) {
   return c;
 }
 
-function tinyOptions() {
+function tinyOptions(scoreThreshold = SETTINGS.tinyScoreThreshold) {
   return new faceapi.TinyFaceDetectorOptions({
     inputSize: SETTINGS.tinyInputSize,
-    scoreThreshold: SETTINGS.tinyScoreThreshold,
+    scoreThreshold,
   });
 }
 
-async function detectFamilyFaces(source) {
+async function detectFamilyFaces(source, scoreThreshold = SETTINGS.tinyScoreThreshold) {
   const img = typeof source === "string" ? await loadImageCanvas(source) : source;
   return faceapi
-    .detectAllFaces(img, tinyOptions())
+    .detectAllFaces(img, tinyOptions(scoreThreshold))
     .withFaceLandmarks(true)
     .withFaceDescriptors();
+}
+
+function sidecarPath(imagePath) {
+  return imagePath.replace(/\.(jpe?g|png|webp)$/i, ".json");
+}
+
+function loadSidecar(imagePath) {
+  const jsonPath = sidecarPath(imagePath);
+  if (!fs.existsSync(jsonPath)) return null;
+  try {
+    const data = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
+    if (!Array.isArray(data.descriptor)) return null;
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+function saveSidecar(imagePath, name, descriptor) {
+  const jsonPath = sidecarPath(imagePath);
+  fs.writeFileSync(
+    jsonPath,
+    JSON.stringify(
+      {
+        name,
+        descriptor: Array.from(descriptor),
+        createdAt: new Date().toISOString(),
+      },
+      null,
+      2
+    )
+  );
+}
+
+async function detectReferenceFaces(imagePath) {
+  let faces = await detectFamilyFaces(imagePath);
+  if (faces.length) return faces;
+
+  const upscaled = await sharp(imagePath)
+    .rotate()
+    .resize(MIN_REF_SIZE, MIN_REF_SIZE, { fit: "inside", withoutEnlargement: false })
+    .jpeg({ quality: 90 })
+    .toBuffer();
+  faces = await detectFamilyFaces(upscaled, SETTINGS.refScoreThreshold);
+  return faces;
+}
+
+async function detectBestFace(sourcePath) {
+  await loadModels();
+  const normalized = await sharp(sourcePath).rotate().jpeg({ quality: 90 }).toBuffer();
+  const rotations = [0, 90, 180, 270];
+  let best = null;
+
+  for (const deg of rotations) {
+    const buffer =
+      deg === 0 ? normalized : await sharp(normalized).rotate(deg).jpeg({ quality: 90 }).toBuffer();
+    const faces = await detectFamilyFaces(buffer, SETTINGS.refScoreThreshold);
+    if (!faces.length) continue;
+    const top = faces.reduce((a, b) => (a.detection.score > b.detection.score ? a : b));
+    if (!best || top.detection.score > best.face.detection.score) {
+      best = { face: top, rotation: deg, buffer };
+    }
+  }
+
+  return best;
 }
 
 async function loadFamilyReferences(refDir, threshold = 0.55) {
@@ -90,14 +157,24 @@ async function loadFamilyReferences(refDir, threshold = 0.55) {
   for (const file of files) {
     const name = path.basename(file, path.extname(file)).toLowerCase();
     const full = path.join(refDir, file);
-    const faces = await detectFamilyFaces(full);
+    const sidecar = loadSidecar(full);
+
+    if (sidecar) {
+      labeled.push(new faceapi.LabeledFaceDescriptors(name, [new Float32Array(sidecar.descriptor)]));
+      console.log(`  Riferimento: ${name} (${file} + sidecar)`);
+      continue;
+    }
+
+    const faces = await detectReferenceFaces(full);
     if (!faces.length) {
       console.warn(`  Nessun volto in riferimento: ${file}`);
+      console.warn(`    Rigenera: npm run family:setup -- ${name} "percorso\\foto.jpg"`);
       continue;
     }
     const best = faces.reduce((a, b) => (a.detection.score > b.detection.score ? a : b));
+    saveSidecar(full, name, best.descriptor);
     labeled.push(new faceapi.LabeledFaceDescriptors(name, [best.descriptor]));
-    console.log(`  Riferimento: ${name} (${file})`);
+    console.log(`  Riferimento: ${name} (${file}, sidecar creato)`);
   }
 
   if (!labeled.length) return null;
@@ -131,6 +208,22 @@ function matchFaces(faces, options = {}) {
   };
 }
 
+function scoreDescriptor(descriptor, options = {}) {
+  if (!matcher) {
+    return { familyScore: 0, matches: [], faceCount: 1, members: [], hasFaces: true };
+  }
+  const best = matcher.findBestMatch(descriptor);
+  const members = best.label !== "unknown" ? [best.label] : [];
+  const familyScore = members.length >= (options.minMatches ?? 1) ? 100 : 0;
+  return {
+    familyScore,
+    matches: members.length ? [{ member: best.label, distance: best.distance, score: 1 }] : [],
+    faceCount: 1,
+    members,
+    hasFaces: true,
+  };
+}
+
 async function scoreFamilyPhoto(filePath, options = {}) {
   if (!matcher) {
     return { familyScore: 0, matches: [], faceCount: 0, members: [], hasFaces: false };
@@ -145,6 +238,19 @@ async function scoreFamilyPhoto(filePath, options = {}) {
   } catch {
     return { familyScore: 0, matches: [], faceCount: 0, members: [], hasFaces: false };
   }
+}
+
+async function scoreReferenceFile(imagePath, expectedName, options = {}) {
+  const sidecar = loadSidecar(imagePath);
+  if (sidecar) {
+    return scoreDescriptor(new Float32Array(sidecar.descriptor), options);
+  }
+  const result = await scoreFamilyPhoto(imagePath, options);
+  if (result.members.includes(expectedName)) return result;
+
+  const faces = await detectReferenceFaces(imagePath);
+  if (!faces.length) return result;
+  return matchFaces(faces, { ...options, minConfidence: 0.2 });
 }
 
 async function scoreFamilyCanvas(imgCanvas, options = {}) {
@@ -167,30 +273,49 @@ async function scoreFamilyCanvas(imgCanvas, options = {}) {
 }
 
 async function extractReferenceFace(sourcePath, outPath) {
-  await loadModels();
-  const faces = await detectFamilyFaces(sourcePath);
-  if (!faces.length) throw new Error(`Nessun volto in ${sourcePath}`);
-  const best = faces.reduce((a, b) => (a.detection.score > b.detection.score ? a : b));
-  const box = best.detection.box;
-  const img = await loadImageCanvas(sourcePath);
-  const pad = Math.round(Math.max(box.width, box.height) * 0.3);
+  const best = await detectBestFace(sourcePath);
+  if (!best) throw new Error(`Nessun volto in ${sourcePath} (provate anche rotazioni 0/90/180/270°)`);
+
+  const { face, rotation, buffer } = best;
+  const box = face.detection.box;
+  const img = await loadImageCanvas(buffer);
+  const pad = Math.round(Math.max(box.width, box.height) * 0.4);
   const x = Math.max(0, Math.floor(box.x - pad));
   const y = Math.max(0, Math.floor(box.y - pad));
-  const w = Math.min(img.width - x, Math.ceil(box.width + pad * 2));
-  const h = Math.min(img.height - y, Math.ceil(box.height + pad * 2));
+  let w = Math.min(img.width - x, Math.ceil(box.width + pad * 2));
+  let h = Math.min(img.height - y, Math.ceil(box.height + pad * 2));
+
+  const minDim = Math.min(w, h);
+  if (minDim < MIN_REF_SIZE) {
+    const scale = MIN_REF_SIZE / minDim;
+    w = Math.ceil(w * scale);
+    h = Math.ceil(h * scale);
+  }
+
   const c = canvas.createCanvas(w, h);
-  c.getContext("2d").drawImage(img, x, y, w, h, 0, 0, w, h);
+  const ctx = c.getContext("2d");
+  ctx.drawImage(img, x, y, Math.min(img.width - x, Math.ceil(box.width + pad * 2)), Math.min(img.height - y, Math.ceil(box.height + pad * 2)), 0, 0, w, h);
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, c.toBuffer("image/jpeg", { quality: 0.92 }));
+
+  const name = path.basename(outPath, path.extname(outPath)).toLowerCase();
+  saveSidecar(outPath, name, face.descriptor);
+
+  if (rotation !== 0) {
+    console.log(`  (foto ruotata di ${rotation}° per rilevare il volto)`);
+  }
 }
 
 module.exports = {
   configureFamilyMatcher,
   loadFamilyReferences,
   scoreFamilyPhoto,
+  scoreReferenceFile,
   scoreFamilyCanvas,
   loadImageCanvas,
   extractReferenceFace,
+  loadSidecar,
+  saveSidecar,
   loadModels,
   detectFaces: detectFamilyFaces,
 };

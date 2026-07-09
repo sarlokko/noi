@@ -12,6 +12,7 @@ const {
   configureFamilyMatcher,
   loadFamilyReferences,
   scoreFamilyPhoto,
+  scoreReferenceFile,
   getFamilyMatcher,
 } = require("./family-matcher-loader");
 
@@ -124,10 +125,11 @@ async function main() {
   for (const file of refFiles) {
     const name = path.basename(file, path.extname(file)).toLowerCase();
     const full = path.join(refDir, file);
-    const result = await scoreFamilyPhoto(full, { minMatches: 1 });
+    const result = await scoreReferenceFile(full, name, { minMatches: 1 });
     const ok = result.members.includes(name);
     const icon = ok ? "✅" : "❌";
-    log(`${icon} ${file} → riconosciuto come: ${result.members.join(", ") || "nessuno"} (volti: ${result.faceCount})`);
+    const detail = result.faceCount ? `volti: ${result.faceCount}` : "sidecar";
+    log(`${icon} ${file} → riconosciuto come: ${result.members.join(", ") || "nessuno"} (${detail})`);
     if (ok) selfOk++;
     else failed = true;
   }

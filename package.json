@@ -8,6 +8,8 @@
     "import:scan": "node scripts/import-photos.js --scan",
     "import:update": "node scripts/import-photos.js --update",
     "family:setup": "node scripts/setup-family-refs.js",
+    "family:refresh-sidecars": "node scripts/refresh-family-sidecars.js",
+    "family:reset-index": "node scripts/reset-photo-index.js",
     "family:verify": "node scripts/verify-family.js",
     "family:test": "node scripts/test-family-recognition.js",
     "optimize": "node scripts/optimize-photos.js",

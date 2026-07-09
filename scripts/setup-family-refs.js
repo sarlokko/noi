@@ -10,7 +10,7 @@
 
 const fs = require("fs");
 const path = require("path");
-const { detectFaces, extractReferenceFace, loadModels } = require("./family-matcher");
+const { detectFaces, extractReferenceFace, loadModels, saveSidecar } = require("./family-matcher");
 
 const ROOT = path.join(__dirname, "..");
 const OUT = path.join(ROOT, "config", "family");
@@ -36,6 +36,7 @@ async function saveFaceByIndex(groupPath, names) {
     c.getContext("2d").drawImage(img, x, y, w, h, 0, 0, w, h);
     const out = path.join(OUT, `${name}.jpg`);
     fs.writeFileSync(out, c.toBuffer("image/jpeg", { quality: 0.92 }));
+    saveSidecar(out, name, sorted[i].descriptor);
     console.log(`Salvato: ${out}`);
   }
 }
