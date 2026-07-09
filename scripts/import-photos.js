@@ -1,13 +1,17 @@
 /**
- * Importa foto da cartella reflex, seleziona le migliori con filtro famiglia.
+ * Importa foto da cartella reflex.
+ *
+ * Modalità:
+ *   npm run import -- "E:\100_FUJI"          import completo (usa indice)
+ *   npm run import:scan -- "E:\100_FUJI"     solo indicizza (prima volta / overnight)
+ *   npm run import:update                      solo foto nuove + aggiorna gallery
  */
 
 const fs = require("fs");
-const os = require("os");
 const path = require("path");
 const sharp = require("sharp");
 const { getExportSettings, exportPhotoFiles } = require("./export-utils");
-const { FamilyScoreCache } = require("./family-score-cache");
+const { PhotoIndex } = require("./photo-index");
 const {
   configureFamilyMatcher,
   loadFamilyReferences,
@@ -20,10 +24,19 @@ const CONFIG = JSON.parse(fs.readFileSync(path.join(ROOT, "config.json"), "utf8"
 const EXT = new Set([".jpg", ".jpeg", ".png", ".webp", ".tif", ".tiff"]);
 const FAMILY = CONFIG.familyFilter || {};
 
-const sourceArg = process.argv[2] || CONFIG.sourceFolder;
+function parseArgs() {
+  const args = process.argv.slice(2);
+  const mode = args.includes("--scan") ? "scan" : args.includes("--update") ? "update" : "import";
+  const folder = args.find((a) => !a.startsWith("--")) || CONFIG.sourceFolder;
+  return { mode, folder };
+}
+
+const { mode, folder: sourceArg } = parseArgs();
+
 if (!sourceArg || !fs.existsSync(sourceArg)) {
   console.error("Specifica la cartella foto:");
   console.error('  npm run import -- "E:\\100_FUJI"');
+  console.error('  npm run import:scan -- "E:\\100_FUJI"');
   process.exit(1);
 }
 
@@ -33,15 +46,6 @@ const OUT = {
   originals: path.join(ROOT, "public", "originals"),
   data: path.join(ROOT, "public", "data", "gallery.json"),
 };
-
-for (const d of Object.values(OUT)) {
-  if (d.endsWith(".json")) {
-    fs.mkdirSync(path.dirname(d), { recursive: true });
-    continue;
-  }
-  fs.mkdirSync(d, { recursive: true });
-  fs.readdirSync(d).forEach((f) => fs.unlinkSync(path.join(d, f)));
-}
 
 function walk(dir, files = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -59,60 +63,7 @@ function formatEta(seconds) {
   return m > 0 ? `${m}m ${s}s` : `${s}s`;
 }
 
-async function mapPool(items, concurrency, fn) {
-  const results = new Array(items.length);
-  let next = 0;
-
-  async function worker() {
-    while (next < items.length) {
-      const i = next++;
-      results[i] = await fn(items[i], i);
-    }
-  }
-
-  const workers = Array.from({ length: Math.min(concurrency, items.length) }, worker);
-  await Promise.all(workers);
-  return results;
-}
-
-async function scoreImage(filePath, familyEnabled, cache) {
-  let stat;
-  try {
-    stat = fs.statSync(filePath);
-  } catch {
-    return null;
-  }
-
-  if (familyEnabled && cache) {
-    const cached = cache.get(filePath, stat);
-    if (cached) {
-      if (cached.familyScore === 0) return null;
-      return { filePath, meta: cached.meta, score: cached.score, size: stat.size, family: cached.family };
-    }
-  }
-
-  let meta;
-  try {
-    meta = await sharp(filePath).metadata();
-  } catch {
-    return null;
-  }
-  const pixels = (meta.width || 0) * (meta.height || 0);
-  if (pixels < 400_000) return null;
-
-  let family = { familyScore: 0, members: [] };
-  if (familyEnabled) {
-    try {
-      family = await scoreFamilyPhoto(filePath, { minMatches: FAMILY.minMatches ?? 1 });
-    } catch {
-      return null;
-    }
-    if (family.familyScore === 0) {
-      cache?.set(filePath, stat, { familyScore: 0, family, meta: null, score: 0 });
-      return null;
-    }
-  }
-
+async function computeQuality(filePath, meta, stat) {
   let sharpness = 0;
   try {
     const { channels } = await sharp(filePath)
@@ -128,16 +79,131 @@ async function scoreImage(filePath, familyEnabled, cache) {
     sharpness = 0;
   }
 
+  const pixels = (meta.width || 0) * (meta.height || 0);
   const megapixels = pixels / 1_000_000;
-  const qualityScore = megapixels * 40 + sharpness * 0.15 + Math.log10(stat.size + 1) * 5;
-  const score = qualityScore + (family.familyScore || 0);
-  const result = { filePath, meta, score, size: stat.size, family };
+  return megapixels * 40 + sharpness * 0.15 + Math.log10(stat.size + 1) * 5;
+}
 
-  if (familyEnabled && cache) {
-    cache.set(filePath, stat, { familyScore: family.familyScore, family, meta, score });
+async function analyzeOne(filePath, familyActive, familyOpts) {
+  let stat;
+  try {
+    stat = fs.statSync(filePath);
+  } catch {
+    return null;
   }
 
-  return result;
+  let meta;
+  try {
+    meta = await sharp(filePath).metadata();
+  } catch {
+    return null;
+  }
+
+  const pixels = (meta.width || 0) * (meta.height || 0);
+  if (pixels < 400_000) {
+    return {
+      filePath,
+      stat,
+      familyScore: 0,
+      members: [],
+      hasFaces: false,
+      qualityScore: 0,
+      totalScore: 0,
+      width: meta.width,
+      height: meta.height,
+    };
+  }
+
+  let family;
+  if (familyActive) {
+    family = await scoreFamilyPhoto(filePath, familyOpts);
+  } else {
+    family = { familyScore: 1, members: [], hasFaces: true, faceCount: 0 };
+  }
+
+  const qualityScore =
+    family.familyScore > 0 || !familyActive
+      ? await computeQuality(filePath, meta, stat)
+      : 0;
+
+  return {
+    filePath,
+    stat,
+    familyScore: family.familyScore || 0,
+    members: family.members || [],
+    hasFaces: family.hasFaces ?? family.faceCount > 0,
+    faceCount: family.faceCount || 0,
+    qualityScore,
+    totalScore: qualityScore + (family.familyScore || 0),
+    width: meta.width,
+    height: meta.height,
+  };
+}
+
+async function scanFiles(files, familyActive, index, familyOpts) {
+  const toProcess = [];
+  let skipped = 0;
+
+  for (const filePath of files) {
+    let stat;
+    try {
+      stat = fs.statSync(filePath);
+    } catch {
+      continue;
+    }
+    if (index.isCurrent(filePath, stat)) {
+      skipped++;
+      continue;
+    }
+    toProcess.push({ filePath, stat });
+  }
+
+  console.log(`Indice: ${skipped} già analizzate, ${toProcess.length} da processare.`);
+
+  if (!toProcess.length) return { skipped, processed: 0 };
+
+  const started = Date.now();
+
+  for (let i = 0; i < toProcess.length; i++) {
+    const { filePath, stat } = toProcess[i];
+    const result = await analyzeOne(filePath, familyActive, familyOpts);
+    if (result) {
+      index.set(filePath, stat, {
+        familyScore: result.familyScore,
+        members: result.members,
+        hasFaces: result.hasFaces,
+        faceCount: result.faceCount,
+        qualityScore: result.qualityScore,
+        totalScore: result.totalScore,
+        width: result.width,
+        height: result.height,
+      });
+    }
+
+    const done = i + 1;
+    if (done % 5 === 0 || done === toProcess.length) {
+      const elapsed = (Date.now() - started) / 1000;
+      const rate = done / Math.max(elapsed, 0.1);
+      const eta = formatEta((toProcess.length - done) / rate);
+      process.stdout.write(`  Scansione ${done}/${toProcess.length} — ETA ${eta}    \r`);
+    }
+    if (done % 50 === 0) index.save();
+  }
+
+  index.save();
+  console.log("");
+  return { skipped, processed: toProcess.length };
+}
+
+function clearOutputDirs() {
+  for (const d of Object.values(OUT)) {
+    if (d.endsWith(".json")) {
+      fs.mkdirSync(path.dirname(d), { recursive: true });
+      continue;
+    }
+    fs.mkdirSync(d, { recursive: true });
+    fs.readdirSync(d).forEach((f) => fs.unlinkSync(path.join(d, f)));
+  }
 }
 
 function slug(name, i) {
@@ -148,22 +214,46 @@ function slug(name, i) {
   return `${String(i).padStart(2, "0")}-${base}`;
 }
 
-async function exportPhoto(filePath, id) {
-  return exportPhotoFiles(filePath, OUT, id, getExportSettings(CONFIG));
+async function buildGallery(index, familyActive) {
+  let candidates = index.familyCandidates();
+
+  if (!familyActive) {
+    candidates = Object.entries(index.data.files).map(([filePath, e]) => ({
+      filePath,
+      ...e,
+    }));
+  }
+
+  for (const c of candidates) {
+    if (!c.qualityScore && c.familyScore > 0) {
+      let stat, meta;
+      try {
+        stat = fs.statSync(c.filePath);
+        meta = await sharp(c.filePath).metadata();
+        c.qualityScore = await computeQuality(c.filePath, meta, stat);
+        c.totalScore = c.qualityScore + c.familyScore;
+        index.set(c.filePath, stat, c);
+      } catch {
+        c.totalScore = c.familyScore;
+      }
+    }
+  }
+
+  candidates.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
+  return candidates.slice(0, CONFIG.maxGalleryPhotos);
 }
 
 async function main() {
   const familyEnabled = FAMILY.enabled !== false;
   let familyActive = false;
-  const concurrency = FAMILY.concurrency ?? Math.min(4, os.cpus().length || 2);
-  const useCache = FAMILY.useCache !== false;
-  const cache = new FamilyScoreCache(useCache && familyEnabled);
+  const index = new PhotoIndex(sourceArg, FAMILY.useIndex !== false);
+  const familyOpts = { minMatches: FAMILY.minMatches ?? 1 };
 
   if (familyEnabled && getFamilyMatcher()) {
     configureFamilyMatcher({
-      quickDetectMaxSize: FAMILY.quickDetectMaxSize ?? 512,
-      matchDetectMaxSize: FAMILY.matchDetectMaxSize ?? 1024,
-      minConfidence: FAMILY.minConfidence ?? 0.45,
+      matchDetectMaxSize: FAMILY.matchDetectMaxSize ?? 640,
+      detectMaxSize: FAMILY.matchDetectMaxSize ?? 640,
+      tinyInputSize: FAMILY.tinyInputSize ?? 416,
     });
 
     const refDir = path.resolve(ROOT, FAMILY.referenceDir || "config/family");
@@ -171,56 +261,50 @@ async function main() {
     const matcher = await loadFamilyReferences(refDir, FAMILY.matchThreshold ?? 0.62);
     if (matcher) {
       familyActive = true;
-      console.log("Filtro famiglia attivo (Marco, Laura, Luca, Giorgia).");
-      console.log(`  Modalità veloce: pre-filtro volti + cache${useCache ? " attiva" : " disattiva"}`);
-      console.log(`  Parallelismo: ${concurrency} foto alla volta`);
+      console.log("Filtro famiglia attivo — modalità single-pass (TinyFaceDetector).");
     } else {
-      console.warn("ATTENZIONE: nessun riferimento in config/family/ — import senza filtro famiglia.");
+      console.warn("ATTENZIONE: nessun riferimento — import senza filtro famiglia.");
     }
   }
 
-  console.log("Scansione:", sourceArg);
+  console.log("Cartella:", sourceArg);
+  console.log("Modalità:", mode === "scan" ? "indicizzazione" : mode === "update" ? "aggiornamento incrementale" : "import completo");
+
   const all = walk(sourceArg);
   console.log(`Trovate ${all.length} immagini.`);
 
+  index.pruneMissing(all);
   const started = Date.now();
-  let done = 0;
-  let cacheHits = 0;
 
-  const results = await mapPool(all, concurrency, async (filePath) => {
-    if (familyActive && cache.enabled && cache.get(filePath)) cacheHits++;
-    const result = await scoreImage(filePath, familyActive, cache);
-    done++;
-    if (done % 10 === 0 || done === all.length) {
-      const elapsed = (Date.now() - started) / 1000;
-      const rate = done / elapsed;
-      const eta = formatEta((all.length - done) / rate);
-      process.stdout.write(`  Analisi ${done}/${all.length} — ETA ${eta}    \r`);
-    }
-    if (done % 100 === 0) cache.save();
-    return result;
-  });
+  await scanFiles(all, familyActive, index, familyOpts);
 
-  cache.save();
-  console.log("");
+  const istats = index.stats();
+  console.log(`Indice: ${istats.total} foto, ${istats.family} famiglia, ${istats.noFace} senza volti.`);
 
-  const scored = results.filter(Boolean);
-  const skipped = all.length - scored.length;
-  if (familyActive && useCache && cacheHits > 0) {
-    console.log(`Cache riutilizzata per ${cacheHits} foto già analizzate.`);
+  if (mode === "scan") {
+    const totalMin = ((Date.now() - started) / 60000).toFixed(1);
+    console.log(`\nIndicizzazione completata (${totalMin} min).`);
+    console.log("Prossimo passo: npm run import:update");
+    return;
   }
-  console.log(`Idonee: ${scored.length}, escluse: ${skipped}.`);
 
-  scored.sort((a, b) => b.score - a.score);
-  const picked = scored.slice(0, CONFIG.maxGalleryPhotos);
+  const picked = await buildGallery(index, familyActive);
   console.log(`Selezionate ${picked.length} migliori foto (max ${CONFIG.maxGalleryPhotos}).`);
 
+  if (!picked.length) {
+    console.error("Nessuna foto idonea. Verifica config/family/ con npm run family:test");
+    process.exit(1);
+  }
+
+  clearOutputDirs();
   const gallery = [];
+
   for (let i = 0; i < picked.length; i++) {
-    const { filePath, family } = picked[i];
+    const { filePath, members } = picked[i];
     const id = slug(filePath, i + 1);
-    const entry = await exportPhoto(filePath, id);
-    if (family?.members?.length) entry.family = family.members;
+    const entry = await exportPhotoFiles(filePath, OUT, id, getExportSettings(CONFIG));
+    entry.sourcePath = filePath;
+    if (members?.length) entry.family = members;
     gallery.push(entry);
     process.stdout.write(`  Esportata ${i + 1}/${picked.length}: ${path.basename(filePath)}\n`);
   }
@@ -230,6 +314,7 @@ async function main() {
     JSON.stringify({ updated: new Date().toISOString(), photos: gallery }, null, 2)
   );
 
+  index.save();
   const totalMin = ((Date.now() - started) / 60000).toFixed(1);
   console.log(`\nGallery pronta in public/ (${totalMin} min) — avvia con: npm run serve`);
 }

@@ -53,45 +53,55 @@ if errorlevel 1 (
   echo ============================================
   echo  TEST FALLITO - NON avviare l'import.
   echo  Controlla reports\family-test-report.txt
-  echo  e rigenera config\family\ se necessario.
   echo ============================================
   goto :fine
 )
 
-echo.
-echo [5/5] Import completo gallery...
 for /f "delims=" %%F in ('node -e "console.log(JSON.parse(require('fs').readFileSync('config.json','utf8')).sourceFolder)"') do set "SOURCE=%%F"
 
 if not exist "%SOURCE%" (
   echo [ERRORE] Cartella foto non trovata: %SOURCE%
-  echo Modifica sourceFolder in config.json e rilancia.
   goto :fine
 )
 
-echo Cartella sorgente: %SOURCE%
-echo ATTENZIONE: l'import puo' richiedere 15-40 minuti.
 echo.
-set /p CONFERMA=Avviare import completo? [S/N]: 
-if /i not "%CONFERMA%"=="S" (
-  echo Import annullato. Rilancia import-auto.bat quando vuoi.
-  goto :fine
+echo [5/5] Import / aggiornamento gallery...
+echo Cartella sorgente: %SOURCE%
+echo.
+
+if exist ".cache\photo-index.json" (
+  echo Indice trovato — modalita' INCREMENTALE ^(solo foto nuove^).
+  echo Tempo atteso: pochi minuti se hai aggiunto poche foto.
+  echo.
+  set /p CONFERMA=Avviare aggiornamento? [S/N]: 
+  if /i not "%CONFERMA%"=="S" goto :fine
+  call npm run import:update -- "%SOURCE%"
+) else (
+  echo PRIMA VOLTA — serve indicizzare tutte le foto ^(1-2 ore^).
+  echo Puoi interrompere con Ctrl+C: l'indice salva i progressi ogni 50 foto.
+  echo Al termine rilancia il bat per aggiornare la gallery.
+  echo.
+  set /p CONFERMA=Avviare indicizzazione? [S/N]: 
+  if /i not "%CONFERMA%"=="S" goto :fine
+  call npm run import:scan -- "%SOURCE%"
+  echo.
+  set /p CONFERMA2=Indicizzazione finita. Creare gallery adesso? [S/N]: 
+  if /i not "%CONFERMA2%"=="S" goto :fine
+  call npm run import:update -- "%SOURCE%"
 )
 
-call npm run import -- "%SOURCE%"
 if errorlevel 1 (
-  echo [ERRORE] Import fallito. Controlla il messaggio sopra.
+  echo [ERRORE] Operazione fallita.
   goto :fine
 )
 
 echo.
 echo ============================================
-echo  IMPORT COMPLETATO
+echo  COMPLETATO
 echo  Gallery in public\ — anteprima: npm run serve
 echo.
-echo  Per pubblicare su GitHub:
-echo    git add public\
-echo    git commit -m "Gallery famiglia aggiornata"
-echo    git push
+echo  Prossime volte: doppio click su import-auto.bat
+echo  analizza SOLO le foto nuove ^(minuti, non ore^).
 echo ============================================
 
 :fine

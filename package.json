@@ -5,6 +5,8 @@
   "description": "Vetrina fotografica con selezione, gallery web e export per stampa",
   "scripts": {
     "import": "node scripts/import-photos.js",
+    "import:scan": "node scripts/import-photos.js --scan",
+    "import:update": "node scripts/import-photos.js --update",
     "family:setup": "node scripts/setup-family-refs.js",
     "family:verify": "node scripts/verify-family.js",
     "family:test": "node scripts/test-family-recognition.js",
