@@ -52,8 +52,14 @@ async function loadImageCanvas(source, maxSize = SETTINGS.detectMaxSize) {
       .resize(maxSize, maxSize, { fit: "inside", withoutEnlargement: true })
       .jpeg({ quality: 80 })
       .toBuffer();
+  } else if (Buffer.isBuffer(source)) {
+    buffer = await sharp(source)
+      .rotate()
+      .resize(maxSize, maxSize, { fit: "inside", withoutEnlargement: true })
+      .jpeg({ quality: 80 })
+      .toBuffer();
   } else {
-    buffer = source;
+    throw new Error(`loadImageCanvas: sorgente non supportata (${typeof source})`);
   }
 
   const img = await canvas.loadImage(buffer);
@@ -70,7 +76,8 @@ function tinyOptions(scoreThreshold = SETTINGS.tinyScoreThreshold) {
 }
 
 async function detectFamilyFaces(source, scoreThreshold = SETTINGS.tinyScoreThreshold) {
-  const img = typeof source === "string" ? await loadImageCanvas(source) : source;
+  const img =
+    source instanceof canvas.Canvas ? source : await loadImageCanvas(source);
   return faceapi
     .detectAllFaces(img, tinyOptions(scoreThreshold))
     .withFaceLandmarks(true)
