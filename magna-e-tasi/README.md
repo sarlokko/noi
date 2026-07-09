@@ -13,9 +13,15 @@ Apri http://localhost:3001
 
 ## Struttura
 
-- `public/data/recipes.json` — ricette (titolo, ingredienti, procedimento, categorie)
-- `public/css/style.css` — stili
-- `public/js/app.js` — logica dell'app (ricerca, filtri, dettaglio ricetta)
+- `public/data/recipes.json` — ricette con video, ingredienti e procedimento
+- `public/css/style.css` — bowl giapponese, carousel 3D e layout video/dettaglio
+- `public/js/app.js` — rotazione ricette nella bowl e vista affiancata
+
+## Interfaccia
+
+1. **Bowl donburi** — le ricette girano all'interno di una grande bowl giapponese
+2. **Selezione** — clicca una ricetta (o usa le frecce) per aprirla
+3. **Vista ricetta** — video a sinistra, ingredienti e procedimento a destra
 
 ## Aggiungere una ricetta
 
@@ -34,9 +40,16 @@ Modifica `public/data/recipes.json` e aggiungi un oggetto con:
   "description": "Breve descrizione della ricetta.",
   "ingredients": ["200 g riso Carnaroli", "..."],
   "steps": ["Trita la cipolla...", "..."],
-  "emoji": "🍚"
+  "emoji": "🍚",
+  "video": {
+    "type": "youtube",
+    "id": "VIDEO_ID_YOUTUBE",
+    "caption": "Didascalia del video"
+  }
 }
 ```
+
+Per video locali usa `"type": "mp4"` e `"src": "videos/nome.mp4"`.
 
 ## Pubblicazione
 

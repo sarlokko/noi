@@ -27,7 +27,12 @@
         "Cuoci i bigoli in abbondante acqua salata, scola al dente e condisci con la salsa.",
         "Servi con pepe nero macinato al momento."
       ],
-      "emoji": "🍝"
+      "emoji": "🍝",
+      "video": {
+        "type": "youtube",
+        "id": "8oDkv8uLqZg",
+        "caption": "Preparazione della pasta fresca — tecnica di base"
+      }
     },
     {
       "id": "risotto-radicchio",
@@ -56,7 +61,12 @@
         "A metà cottura incorpora il radicchio restante.",
         "Manteca con burro e Parmigiano, regola di sale e servi subito."
       ],
-      "emoji": "🍚"
+      "emoji": "🍚",
+      "video": {
+        "type": "youtube",
+        "id": "mU6I25n3U4s",
+        "caption": "Tecnica del risotto mantecato"
+      }
     },
     {
       "id": "polenta-schie",
@@ -83,7 +93,12 @@
         "Completa con prezzemolo tritato e un filo d'olio a crudo.",
         "Versa la polenta nei piatti e adagia le schie sopra."
       ],
-      "emoji": "🦐"
+      "emoji": "🦐",
+      "video": {
+        "type": "youtube",
+        "id": "1D9PikBzNMI",
+        "caption": "Cottura dei gamberetti in padella"
+      }
     },
     {
       "id": "fegato-veneziana",
@@ -110,7 +125,12 @@
         "Unisci le cipolle, sfuma con l'aceto, aggiusta di sale e pepe.",
         "Servi immediatamente con polenta o crostini."
       ],
-      "emoji": "🥩"
+      "emoji": "🥩",
+      "video": {
+        "type": "youtube",
+        "id": "rB5jR6x9p0Y",
+        "caption": "Cottura veloce delle carni in padella"
+      }
     },
     {
       "id": "cicchetti-polpette",
@@ -138,7 +158,12 @@
         "Friggi in olio caldo fino a doratura uniforme.",
         "Asciuga su carta assorbente e servi calde con limone."
       ],
-      "emoji": "🍢"
+      "emoji": "🍢",
+      "video": {
+        "type": "youtube",
+        "id": "4aZr5hmdXPo",
+        "caption": "Preparazione e frittura delle polpette"
+      }
     },
     {
       "id": "tiramisu-classico",
@@ -167,7 +192,12 @@
         "Copri con crema, ripeti gli strati e termina con cacao abbondante.",
         "Riposa in frigo almeno 6 ore."
       ],
-      "emoji": "🍰"
+      "emoji": "🍰",
+      "video": {
+        "type": "youtube",
+        "id": "6VeluS7i0AA",
+        "caption": "Montaggio del tiramisù classico"
+      }
     },
     {
       "id": "pasta-fagioli",
@@ -197,7 +227,12 @@
         "Cuoci la pasta nel composto, aggiungendo acqua o brodo se necessario.",
         "Servi con olio a crudo, pepe e rosmarino."
       ],
-      "emoji": "🫘"
+      "emoji": "🫘",
+      "video": {
+        "type": "youtube",
+        "id": "LxXK9fj3X2E",
+        "caption": "Preparazione di una zuppa di legumi"
+      }
     },
     {
       "id": "insalata-rucola",
@@ -223,7 +258,12 @@
         "Condisci con olio, aceto e sale.",
         "Completa con scaglie di grana e servi subito."
       ],
-      "emoji": "🥗"
+      "emoji": "🥗",
+      "video": {
+        "type": "youtube",
+        "id": "qC3J9zDqY0E",
+        "caption": "Composizione di un'insalata fresca"
+      }
     }
   ]
 }

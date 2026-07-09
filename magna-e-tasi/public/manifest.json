@@ -4,8 +4,8 @@
   "description": "Ricette di cucina italiana — dal Veneto e oltre",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#faf6f0",
-  "theme_color": "#c45c26",
+  "background_color": "#120e0c",
+  "theme_color": "#1a1410",
   "lang": "it",
   "icons": [
     {

@@ -1,5 +1,4 @@
 const CATEGORIES = {
-  tutte: "Tutte",
   antipasti: "Antipasti",
   primi: "Primi",
   secondi: "Secondi",
@@ -14,8 +13,9 @@ const DIFFICULTY_LABEL = {
 };
 
 let recipes = [];
-let activeCategory = "tutte";
-let searchQuery = "";
+let activeIndex = 0;
+let autoSpinTimer = null;
+let userPaused = false;
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -31,137 +31,188 @@ function formatTime(minutes) {
   return m ? `${h} h ${m} min` : `${h} h`;
 }
 
-function matchesSearch(recipe, query) {
-  if (!query) return true;
-  const q = query.toLowerCase();
-  const haystack = [
-    recipe.title,
-    recipe.description,
-    recipe.category,
-    ...(recipe.tags || []),
-    ...(recipe.ingredients || []),
-  ]
-    .join(" ")
-    .toLowerCase();
-  return haystack.includes(q);
-}
-
-function getFilteredRecipes() {
-  return recipes.filter((r) => {
-    const catOk = activeCategory === "tutte" || r.category === activeCategory;
-    return catOk && matchesSearch(r, searchQuery);
-  });
-}
-
-function renderFilters() {
-  const container = $("#filters");
-  container.innerHTML = Object.entries(CATEGORIES)
-    .map(
-      ([key, label]) =>
-        `<button type="button" class="filter-btn${key === activeCategory ? " active" : ""}" data-category="${key}" role="tab" aria-selected="${key === activeCategory}">${label}</button>`
-    )
-    .join("");
-
-  container.querySelectorAll(".filter-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      activeCategory = btn.dataset.category;
-      renderFilters();
-      renderGrid();
-    });
-  });
-}
-
-function renderGrid() {
-  const filtered = getFilteredRecipes();
-  const grid = $("#recipe-grid");
-  const empty = $("#empty-state");
-  const countEl = $("#result-count");
-
-  countEl.textContent = filtered.length
-    ? `${filtered.length} ricett${filtered.length === 1 ? "a" : "e"}`
-    : "";
-
-  if (!filtered.length) {
-    grid.innerHTML = "";
-    empty.classList.remove("hidden");
-    return;
-  }
-
-  empty.classList.add("hidden");
-  grid.innerHTML = filtered
-    .map(
-      (r) => `
-    <article class="recipe-card" tabindex="0" data-id="${r.id}" role="button" aria-label="Apri ricetta ${r.title}">
-      <span class="recipe-card-emoji">${r.emoji || "🍽️"}</span>
-      <h2>${escapeHtml(r.title)}</h2>
-      <p class="recipe-card-desc">${escapeHtml(r.description || "")}</p>
-      <div class="recipe-card-meta">
-        <span>⏱ ${formatTime(totalMinutes(r))}</span>
-        <span>👥 ${r.servings || "?"} porzioni</span>
-        <span>📊 ${DIFFICULTY_LABEL[r.difficulty] || r.difficulty || "—"}</span>
-      </div>
-      <span class="recipe-card-category">${CATEGORIES[r.category] || r.category}</span>
-    </article>`
-    )
-    .join("");
-
-  grid.querySelectorAll(".recipe-card").forEach((card) => {
-    const open = () => openModal(card.dataset.id);
-    card.addEventListener("click", open);
-    card.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        open();
-      }
-    });
-  });
-}
-
 function escapeHtml(str) {
   const div = document.createElement("div");
   div.textContent = str;
   return div.innerHTML;
 }
 
-function openModal(id) {
-  const recipe = recipes.find((r) => r.id === id);
-  if (!recipe) return;
+function renderOrbit() {
+  const orbit = $("#orbit");
+  const count = recipes.length;
+  if (!count) return;
 
-  $("#modal-emoji").textContent = recipe.emoji || "🍽️";
-  $("#modal-title").textContent = recipe.title;
-  $("#modal-description").textContent = recipe.description || "";
+  const angleStep = 360 / count;
+  const radius = Math.min(140, 60 + count * 12);
 
-  $("#modal-meta").innerHTML = `
-    <span>⏱ Preparazione: ${formatTime(recipe.prepMinutes)}</span>
+  orbit.innerHTML = recipes
+    .map(
+      (r, i) => `
+    <button type="button" class="orbit-item${i === activeIndex ? " active" : ""}"
+      data-index="${i}"
+      style="transform: rotateY(${i * angleStep}deg) translateZ(${radius}px) rotateY(-${i * angleStep}deg)"
+      aria-label="${escapeHtml(r.title)}"
+      role="listitem">
+      <span class="orbit-item-emoji">${r.emoji || "🍽️"}</span>
+      <span class="orbit-item-title">${escapeHtml(r.title)}</span>
+    </button>`
+    )
+    .join("");
+
+  orbit.style.transform = `rotateY(${-activeIndex * angleStep}deg)`;
+
+  orbit.querySelectorAll(".orbit-item").forEach((item) => {
+    item.addEventListener("click", () => {
+      const idx = Number(item.dataset.index);
+      setActiveIndex(idx, true);
+      openRecipe(idx);
+    });
+  });
+
+  renderDots();
+}
+
+function renderDots() {
+  const dots = $("#bowl-dots");
+  dots.innerHTML = recipes
+    .map(
+      (_, i) =>
+        `<button type="button" class="bowl-dot${i === activeIndex ? " active" : ""}" data-index="${i}" role="tab" aria-selected="${i === activeIndex}" aria-label="Ricetta ${i + 1}"></button>`
+    )
+    .join("");
+
+  dots.querySelectorAll(".bowl-dot").forEach((dot) => {
+    dot.addEventListener("click", () => {
+      setActiveIndex(Number(dot.dataset.index), true);
+    });
+  });
+}
+
+function setActiveIndex(index, pauseAuto = false) {
+  if (!recipes.length) return;
+  activeIndex = ((index % recipes.length) + recipes.length) % recipes.length;
+  if (pauseAuto) userPaused = true;
+  renderOrbit();
+}
+
+function nextRecipe() {
+  setActiveIndex(activeIndex + 1);
+}
+
+function prevRecipe() {
+  setActiveIndex(activeIndex - 1);
+}
+
+function startAutoSpin() {
+  stopAutoSpin();
+  autoSpinTimer = setInterval(() => {
+    if (!userPaused) nextRecipe();
+  }, 4000);
+}
+
+function stopAutoSpin() {
+  if (autoSpinTimer) {
+    clearInterval(autoSpinTimer);
+    autoSpinTimer = null;
+  }
+}
+
+function buildVideoElement(recipe) {
+  const video = recipe.video;
+  if (!video) return null;
+
+  if (video.type === "youtube" && video.id) {
+    const iframe = document.createElement("iframe");
+    iframe.src = `https://www.youtube-nocookie.com/embed/${video.id}?rel=0&modestbranding=1`;
+    iframe.title = `Video: ${recipe.title}`;
+    iframe.allow =
+      "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+    iframe.allowFullscreen = true;
+    return iframe;
+  }
+
+  if (video.type === "mp4" && video.src) {
+    const el = document.createElement("video");
+    el.src = video.src;
+    el.controls = true;
+    el.playsInline = true;
+    el.poster = video.poster || "";
+    el.setAttribute("aria-label", `Video: ${recipe.title}`);
+    return el;
+  }
+
+  return null;
+}
+
+function renderVideo(recipe) {
+  const frame = $("#video-frame");
+  const caption = $("#video-caption");
+  frame.innerHTML = "";
+
+  const media = buildVideoElement(recipe);
+  if (media) {
+    frame.appendChild(media);
+    caption.textContent = recipe.video.caption || `Video tutorial — ${recipe.title}`;
+  } else {
+    frame.innerHTML = `<p class="video-placeholder">Video in arrivo per questa ricetta</p>`;
+    caption.textContent = "";
+  }
+}
+
+function renderDetail(recipe) {
+  $("#detail-emoji").textContent = recipe.emoji || "🍽️";
+  $("#detail-category").textContent = CATEGORIES[recipe.category] || recipe.category;
+  $("#detail-title").textContent = recipe.title;
+  $("#detail-description").textContent = recipe.description || "";
+
+  $("#detail-meta").innerHTML = `
+    <span>⏱ Totale: ${formatTime(totalMinutes(recipe))}</span>
+    <span>🔪 Prep: ${formatTime(recipe.prepMinutes)}</span>
     <span>🔥 Cottura: ${formatTime(recipe.cookMinutes)}</span>
     <span>👥 ${recipe.servings} porzioni</span>
     <span>📊 ${DIFFICULTY_LABEL[recipe.difficulty] || recipe.difficulty}</span>
   `;
 
-  $("#modal-tags").innerHTML = (recipe.tags || [])
+  $("#detail-tags").innerHTML = (recipe.tags || [])
     .map((t) => `<span>#${escapeHtml(t)}</span>`)
     .join("");
 
-  $("#modal-ingredients").innerHTML = (recipe.ingredients || [])
+  $("#detail-ingredients").innerHTML = (recipe.ingredients || [])
     .map((i) => `<li>${escapeHtml(i)}</li>`)
     .join("");
 
-  $("#modal-steps").innerHTML = (recipe.steps || [])
+  $("#detail-steps").innerHTML = (recipe.steps || [])
     .map((s) => `<li>${escapeHtml(s)}</li>`)
     .join("");
-
-  const modal = $("#recipe-modal");
-  modal.classList.remove("hidden");
-  modal.setAttribute("aria-hidden", "false");
-  document.body.style.overflow = "hidden";
-  $("#modal-close").focus();
 }
 
-function closeModal() {
-  const modal = $("#recipe-modal");
-  modal.classList.add("hidden");
-  modal.setAttribute("aria-hidden", "true");
-  document.body.style.overflow = "";
+function openRecipe(index) {
+  const recipe = recipes[index];
+  if (!recipe) return;
+
+  userPaused = true;
+  renderVideo(recipe);
+  renderDetail(recipe);
+
+  $("#recipe-stage").classList.remove("hidden");
+  $("#donburi").closest(".donburi-wrap").classList.add("hidden");
+  $(".bowl-controls").classList.add("hidden");
+  $("#bowl-dots").classList.add("hidden");
+
+  document.getElementById("recipe-stage").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function closeRecipe() {
+  $("#recipe-stage").classList.add("hidden");
+  $("#donburi").closest(".donburi-wrap").classList.remove("hidden");
+  $(".bowl-controls").classList.remove("hidden");
+  $("#bowl-dots").classList.remove("hidden");
+
+  const frame = $("#video-frame");
+  frame.innerHTML = `<p class="video-placeholder">Seleziona una ricetta dalla bowl</p>`;
+  $("#video-caption").textContent = "";
+
+  userPaused = false;
 }
 
 async function loadRecipes() {
@@ -170,39 +221,53 @@ async function loadRecipes() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     recipes = data.recipes || [];
-    renderFilters();
-    renderGrid();
+    activeIndex = 0;
+    renderOrbit();
+    startAutoSpin();
   } catch (err) {
     console.error("Impossibile caricare le ricette:", err);
-    $("#recipe-grid").innerHTML = "";
-    $("#empty-state").classList.remove("hidden");
-    $("#empty-state p").textContent = "Errore nel caricamento delle ricette.";
+    $("#orbit").innerHTML =
+      `<p style="color:#b8a898;text-align:center;padding:2rem">Errore nel caricamento delle ricette.</p>`;
   }
 }
 
 function init() {
   $("#year").textContent = new Date().getFullYear();
 
-  $("#search").addEventListener("input", (e) => {
-    searchQuery = e.target.value.trim();
-    renderGrid();
+  $("#btn-prev").addEventListener("click", () => {
+    userPaused = true;
+    prevRecipe();
   });
 
-  $("#btn-reset").addEventListener("click", () => {
-    searchQuery = "";
-    activeCategory = "tutte";
-    $("#search").value = "";
-    renderFilters();
-    renderGrid();
+  $("#btn-next").addEventListener("click", () => {
+    userPaused = true;
+    nextRecipe();
   });
 
-  $("#modal-close").addEventListener("click", closeModal);
-  $("#modal-backdrop").addEventListener("click", closeModal);
+  $("#btn-back").addEventListener("click", closeRecipe);
+
+  $("#donburi").addEventListener("mouseenter", () => {
+    userPaused = true;
+  });
+
+  $("#donburi").addEventListener("mouseleave", () => {
+    if ($("#recipe-stage").classList.contains("hidden")) userPaused = false;
+  });
 
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !$("#recipe-modal").classList.contains("hidden")) {
-      closeModal();
+    if (!$("#recipe-stage").classList.contains("hidden")) {
+      if (e.key === "Escape") closeRecipe();
+      return;
     }
+    if (e.key === "ArrowLeft") {
+      userPaused = true;
+      prevRecipe();
+    }
+    if (e.key === "ArrowRight") {
+      userPaused = true;
+      nextRecipe();
+    }
+    if (e.key === "Enter") openRecipe(activeIndex);
   });
 
   loadRecipes();

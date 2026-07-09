@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="description" content="Magna e tasi — ricette di cucina italiana, dal Veneto e oltre">
-  <meta name="theme-color" content="#c45c26">
+  <meta name="description" content="Magna e tasi — ricette di cucina con video e procedimento passo passo">
+  <meta name="theme-color" content="#1a1410">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Magna e tasi">
   <title>Magna e tasi</title>
@@ -17,56 +17,79 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <header class="hero">
-    <div class="hero-inner">
-      <p class="hero-label">Cucina italiana</p>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <p class="site-label">Cucina italiana</p>
       <h1>Magna e tasi</h1>
-      <p class="hero-tagline">Ricette per mangiare bene e restare soddisfatti</p>
+      <p class="site-tagline">Scegli una ricetta dalla bowl — video e procedimento affiancati</p>
     </div>
   </header>
 
-  <div class="toolbar-wrap">
-    <div class="toolbar">
-      <div class="search-box">
-        <span class="search-icon" aria-hidden="true">🔍</span>
-        <input type="search" id="search" placeholder="Cerca ricetta o ingrediente…" autocomplete="off">
-      </div>
-      <div class="filters" id="filters" role="tablist" aria-label="Categorie"></div>
+  <section class="bowl-section" aria-label="Selezione ricette">
+    <div class="bowl-controls">
+      <button type="button" id="btn-prev" class="bowl-nav" aria-label="Ricetta precedente">&#8249;</button>
+      <button type="button" id="btn-next" class="bowl-nav" aria-label="Ricetta successiva">&#8250;</button>
     </div>
-  </div>
 
-  <main>
-    <p id="result-count" class="result-count" aria-live="polite"></p>
-    <div id="recipe-grid" class="recipe-grid"></div>
-    <div id="empty-state" class="empty-state hidden">
-      <p>Nessuna ricetta trovata.</p>
-      <button type="button" id="btn-reset" class="btn-secondary">Mostra tutte</button>
+    <div class="donburi-wrap">
+      <div class="donburi-shadow" aria-hidden="true"></div>
+      <div class="donburi" id="donburi">
+        <div class="donburi-rim" aria-hidden="true"></div>
+        <div class="donburi-broth" aria-hidden="true">
+          <div class="broth-shimmer"></div>
+          <div class="broth-steam steam-1"></div>
+          <div class="broth-steam steam-2"></div>
+          <div class="broth-steam steam-3"></div>
+        </div>
+        <div class="orbit-scene" id="orbit-scene">
+          <div class="orbit" id="orbit" role="list" aria-label="Ricette in rotazione"></div>
+        </div>
+        <p class="bowl-hint">Le ricette girano nella bowl — clicca per aprire</p>
+      </div>
+    </div>
+
+    <div class="bowl-dots" id="bowl-dots" role="tablist" aria-label="Indice ricette"></div>
+  </section>
+
+  <main class="recipe-stage hidden" id="recipe-stage" aria-live="polite">
+    <div class="recipe-stage-inner">
+      <button type="button" id="btn-back" class="btn-back">← Torna alla bowl</button>
+
+      <article class="recipe-split" id="recipe-split">
+        <section class="recipe-video-panel" aria-label="Video ricetta">
+          <div class="video-frame" id="video-frame">
+            <p class="video-placeholder">Seleziona una ricetta dalla bowl</p>
+          </div>
+          <p class="video-caption" id="video-caption"></p>
+        </section>
+
+        <section class="recipe-detail-panel" aria-label="Dettaglio ricetta">
+          <header class="recipe-detail-header">
+            <span id="detail-emoji" class="detail-emoji"></span>
+            <div>
+              <p id="detail-category" class="detail-category"></p>
+              <h2 id="detail-title"></h2>
+              <p id="detail-description" class="detail-description"></p>
+            </div>
+          </header>
+
+          <div class="detail-meta" id="detail-meta"></div>
+          <div class="detail-tags" id="detail-tags"></div>
+
+          <div class="detail-columns">
+            <section class="detail-block">
+              <h3>Ingredienti</h3>
+              <ul id="detail-ingredients"></ul>
+            </section>
+            <section class="detail-block">
+              <h3>Procedimento</h3>
+              <ol id="detail-steps"></ol>
+            </section>
+          </div>
+        </section>
+      </article>
     </div>
   </main>
-
-  <div id="recipe-modal" class="modal hidden" aria-hidden="true" role="dialog" aria-labelledby="modal-title">
-    <div class="modal-backdrop" id="modal-backdrop"></div>
-    <article class="modal-panel">
-      <button type="button" id="modal-close" class="modal-close" aria-label="Chiudi">&times;</button>
-      <header class="modal-header">
-        <span id="modal-emoji" class="modal-emoji"></span>
-        <div>
-          <h2 id="modal-title"></h2>
-          <p id="modal-description" class="modal-description"></p>
-        </div>
-      </header>
-      <div class="modal-meta" id="modal-meta"></div>
-      <div class="modal-tags" id="modal-tags"></div>
-      <section class="modal-section">
-        <h3>Ingredienti</h3>
-        <ul id="modal-ingredients"></ul>
-      </section>
-      <section class="modal-section">
-        <h3>Procedimento</h3>
-        <ol id="modal-steps"></ol>
-      </section>
-    </article>
-  </div>
 
   <footer class="footer">
     <p>&copy; <span id="year"></span> Magna e tasi — Buon appetito!</p>
